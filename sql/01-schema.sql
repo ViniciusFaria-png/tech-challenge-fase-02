@@ -1,0 +1,24 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE "user" (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL
+)
+
+CREATE TABLE professor (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    materia VARCHAR(100),
+    user_id INTEGER UNIQUE NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+);
+
+
+CREATE TABLE post (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    titulo VARCHAR(200) NOT NULL,
+    resumo VARCHAR(500),
+    conteudo TEXT NOT NULL,
+    professor_id INTEGER NOT NULL REFERENCES professor(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
