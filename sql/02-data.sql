@@ -7,14 +7,15 @@ INSERT INTO "user" (email, senha) VALUES ('fisica@fiap.com', '123456');
 INSERT INTO "user" (email, senha) VALUES ('matematica@fiap.com', '123456');
 INSERT INTO "user" (email, senha) VALUES ('biologia@fiap.com', '123456');
 
-INSERT INTO professor (nome, materia, user_id) VALUES ('Elvis Presley', 'quimica', 8);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Bon Scott', 'ingles', 5);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Jimmy Page', 'portugues', 7);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Lemmy Kilmister', 'geografia', 3);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Tony Iomi', 'historia', 4);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Bruce Dickinson', 'fisica', 2);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Ozzy Osbourne', 'matematica', 6);
-INSERT INTO professor (nome, materia, user_id) VALUES ('Axl Rose', 'biologia', 1);
+INSERT INTO professor (nome, materia, user_id) VALUES 
+('Elvis Presley', 'quimica', (SELECT id FROM "user" WHERE email = 'quimica@fiap.com')),
+('Bon Scott', 'ingles', (SELECT id FROM "user" WHERE email = 'ingles@fiap.com')),
+('Jimmy Page', 'portugues', (SELECT id FROM "user" WHERE email = 'portugues@fiap.com')),
+('Lemmy Kilmister', 'geografia', (SELECT id FROM "user" WHERE email = 'geografia@fiap.com')),
+('Tony Iomi', 'historia', (SELECT id FROM "user" WHERE email = 'historia@fiap.com')),
+('Bruce Dickinson', 'fisica', (SELECT id FROM "user" WHERE email = 'fisica@fiap.com')),
+('Ozzy Osbourne', 'matematica', (SELECT id FROM "user" WHERE email = 'matematica@fiap.com')),
+('Axl Rose', 'biologia', (SELECT id FROM "user" WHERE email = 'biologia@fiap.com'));
 
 INSERT INTO post (titulo, resumo, conteudo, professor_id) 
 VALUES ('Ligações Químicas: O Poder da Atração Molecular', 

@@ -1,7 +1,9 @@
 export interface IPost {
-  id?: number;
-  title: string;
-  content: string;
-  createdAt?: Date;
-  teacher_id?: number | undefined;
+  id: string;
+  titulo: string;
+  resumo?: string;
+  conteudo: string;
+  professor_id: number;
+  created_at: Date;
+  updated_at: Date;
 }
