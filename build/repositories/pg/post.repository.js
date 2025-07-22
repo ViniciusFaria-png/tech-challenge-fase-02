@@ -1,10 +1,12 @@
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -13,14 +15,7 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var __async = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -42,8 +37,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/app.ts
-var import_fastify = __toESM(require("fastify"));
+// src/repositories/pg/post.repository.ts
+var post_repository_exports = {};
+__export(post_repository_exports, {
+  PostRepository: () => PostRepository
+});
+module.exports = __toCommonJS(post_repository_exports);
 
 // src/env/index.ts
 var import_config = require("dotenv/config");
@@ -118,52 +117,7 @@ var PostRepository = class {
     });
   }
 };
-
-// src/use-cases/search-post.ts
-var SearchQueryStringUseCase = class {
-  constructor(postRepository) {
-    this.postRepository = postRepository;
-  }
-  handler(query) {
-    return this.postRepository.searchQueryString(query);
-  }
-};
-
-// src/http/controller/post/search.ts
-var import_zod2 = require("zod");
-function search(request, reply) {
-  return __async(this, null, function* () {
-    const registerBodySchema = import_zod2.z.object({
-      query: import_zod2.z.string()
-    });
-    const { query } = registerBodySchema.parse(request.body);
-    try {
-      const postRepository = new PostRepository();
-      const createSearchUseCase = new SearchQueryStringUseCase(postRepository);
-      const post = yield createSearchUseCase.handler(query);
-      return reply.status(201).send(post);
-    } catch (err) {
-      console.log("Not found.");
-      return reply.status(404).send();
-    }
-  });
-}
-
-// src/http/controller/post/routes.ts
-function postRoutes(app2) {
-  return __async(this, null, function* () {
-    app2.get("/search", search);
-  });
-}
-
-// src/app.ts
-var app = (0, import_fastify.default)();
-app.register(postRoutes);
-
-// src/server.ts
-app.listen({
-  host: "0.0.0.0",
-  port: env.PORT
-}).then(() => {
-  console.log(`Server est\xE1 rodando na porta ${env.PORT}`);
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  PostRepository
 });

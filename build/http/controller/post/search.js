@@ -44,19 +44,76 @@ __export(search_exports, {
 });
 module.exports = __toCommonJS(search_exports);
 
-// src/repositories/post.repository.ts
+// src/env/index.ts
+var import_config = require("dotenv/config");
+var import_zod = require("zod");
+var envSchema = import_zod.z.object({
+  NODE_ENV: import_zod.z.enum(["development", "production", "test"]).default("development"),
+  PORT: import_zod.z.coerce.number().default(3e3),
+  POSTGRES_DB: import_zod.z.string(),
+  POSTGRES_USER: import_zod.z.string(),
+  POSTGRES_PASSWORD: import_zod.z.string(),
+  POSTGRES_PORT: import_zod.z.coerce.number()
+});
+var _env = envSchema.safeParse(process.env);
+if (!_env.success) {
+  console.error("Invalid environment variables", _env.error.format());
+  throw new Error("Invalid environment variables");
+}
+var env = _env.data;
+
+// src/lib/db.ts
+var import_pg = require("pg");
+var CONFIG = {
+  user: env.POSTGRES_USER,
+  host: "localhost",
+  database: env.POSTGRES_DB,
+  password: env.POSTGRES_PASSWORD,
+  port: env.POSTGRES_PORT
+};
+var Database = class {
+  constructor() {
+    this.pool = new import_pg.Pool(CONFIG);
+    this.connection();
+  }
+  connection() {
+    return __async(this, null, function* () {
+      var _a;
+      try {
+        (_a = this.client) != null ? _a : this.client = yield this.pool.connect();
+      } catch (error) {
+        console.error("Error ao conectar ao banco de dados:", error);
+        throw error;
+      }
+    });
+  }
+  get clientInstance() {
+    return this.client;
+  }
+};
+var db = new Database();
+
+// src/repositories/pg/post.repository.ts
 var PostRepository = class {
+  findAll() {
+    return __async(this, null, function* () {
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post`
+      );
+      return (result == null ? void 0 : result.rows) || [];
+    });
+  }
   searchQueryString(query) {
     return __async(this, null, function* () {
-      return {
-        id: "1",
-        titulo: "titulo",
-        resumo: "resumo",
-        conteudo: "conteudo",
-        professor_id: 1,
-        created_at: /* @__PURE__ */ new Date(),
-        updated_at: /* @__PURE__ */ new Date()
-      };
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at
+       FROM post
+       WHERE titulo ILIKE $1 OR conteudo ILIKE $1`,
+        [`%${query}%`]
+      );
+      return (result == null ? void 0 : result.rows) || [];
     });
   }
 };
@@ -72,11 +129,11 @@ var SearchQueryStringUseCase = class {
 };
 
 // src/http/controller/post/search.ts
-var import_zod = require("zod");
+var import_zod2 = require("zod");
 function search(request, reply) {
   return __async(this, null, function* () {
-    const registerBodySchema = import_zod.z.object({
-      query: import_zod.z.string()
+    const registerBodySchema = import_zod2.z.object({
+      query: import_zod2.z.string()
     });
     const { query } = registerBodySchema.parse(request.body);
     try {

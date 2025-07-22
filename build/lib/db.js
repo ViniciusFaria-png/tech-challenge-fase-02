@@ -37,12 +37,13 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/http/controller/post/routes.ts
-var routes_exports = {};
-__export(routes_exports, {
-  postRoutes: () => postRoutes
+// src/lib/db.ts
+var db_exports = {};
+__export(db_exports, {
+  Database: () => Database,
+  db: () => db
 });
-module.exports = __toCommonJS(routes_exports);
+module.exports = __toCommonJS(db_exports);
 
 // src/env/index.ts
 var import_config = require("dotenv/config");
@@ -92,69 +93,8 @@ var Database = class {
   }
 };
 var db = new Database();
-
-// src/repositories/pg/post.repository.ts
-var PostRepository = class {
-  findAll() {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post`
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-  searchQueryString(query) {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at
-       FROM post
-       WHERE titulo ILIKE $1 OR conteudo ILIKE $1`,
-        [`%${query}%`]
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-};
-
-// src/use-cases/search-post.ts
-var SearchQueryStringUseCase = class {
-  constructor(postRepository) {
-    this.postRepository = postRepository;
-  }
-  handler(query) {
-    return this.postRepository.searchQueryString(query);
-  }
-};
-
-// src/http/controller/post/search.ts
-var import_zod2 = require("zod");
-function search(request, reply) {
-  return __async(this, null, function* () {
-    const registerBodySchema = import_zod2.z.object({
-      query: import_zod2.z.string()
-    });
-    const { query } = registerBodySchema.parse(request.body);
-    try {
-      const postRepository = new PostRepository();
-      const createSearchUseCase = new SearchQueryStringUseCase(postRepository);
-      const post = yield createSearchUseCase.handler(query);
-      return reply.status(201).send(post);
-    } catch (err) {
-      console.log("Not found.");
-      return reply.status(404).send();
-    }
-  });
-}
-
-// src/http/controller/post/routes.ts
-function postRoutes(app) {
-  return __async(this, null, function* () {
-    app.get("/search", search);
-  });
-}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  postRoutes
+  Database,
+  db
 });

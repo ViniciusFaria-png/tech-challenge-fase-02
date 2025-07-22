@@ -1,11 +1,9 @@
-import { PostRepository } from "@/repositories/post.repository";
+import { IPostRepository } from "@/repositories/post.repository.interface";
 
-export class SearchQueryStringUseCase{
+export class SearchQueryStringUseCase {
+  constructor(private postRepository: IPostRepository) {}
 
-    constructor(private  postRepository: PostRepository){}
-
-    handler(query: string){
-        return this.postRepository.searchQueryString(query)   
-    }
-
+  handler(query: string) {
+    return this.postRepository.searchQueryString(query);
+  }
 }
