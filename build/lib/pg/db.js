@@ -37,14 +37,13 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/http/controller/post/search.ts
-var search_exports = {};
-__export(search_exports, {
-  search: () => search
+// src/lib/pg/db.ts
+var db_exports = {};
+__export(db_exports, {
+  Database: () => Database,
+  db: () => db
 });
-module.exports = __toCommonJS(search_exports);
-
-// src/lib/db.ts
+module.exports = __toCommonJS(db_exports);
 var import_pg = require("pg");
 
 // src/env/index.ts
@@ -66,7 +65,7 @@ if (!_env.success) {
 }
 var env = _env.data;
 
-// src/lib/db.ts
+// src/lib/pg/db.ts
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTEGRES_HOST,
@@ -95,73 +94,8 @@ var Database = class {
   }
 };
 var db = new Database();
-
-// src/repositories/pg/post.repository.ts
-var PostRepository = class {
-  //async create(): Ana TODO 
-  findAll() {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post`
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-  //async findById(): Vitor TODO
-  //async update(): Ana TODO
-  //async delete(): Vitor TODO
-  searchQueryString(query) {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT * FROM post WHERE titulo ILIKE $1 OR conteudo ILIKE $1`,
-        [`%${query}%`]
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-};
-
-// src/use-cases/search-post.ts
-var SearchQueryStringUseCase = class {
-  constructor(postRepository) {
-    this.postRepository = postRepository;
-  }
-  handler(query) {
-    return this.postRepository.searchQueryString(query);
-  }
-};
-
-// src/http/controller/post/search.ts
-var import_zod2 = require("zod");
-function search(request, reply) {
-  return __async(this, null, function* () {
-    const registerQuerySchema = import_zod2.z.object({
-      query: import_zod2.z.string().min(1, "Query parameter is required")
-    });
-    try {
-      const { query } = registerQuerySchema.parse(request.query);
-      const postRepository = new PostRepository();
-      const createSearchUseCase = new SearchQueryStringUseCase(postRepository);
-      const post = yield createSearchUseCase.handler(query);
-      if (!post || Array.isArray(post) && post.length === 0) {
-        return reply.status(404).send();
-      }
-      return reply.status(200).send(post);
-    } catch (err) {
-      if (err instanceof import_zod2.z.ZodError) {
-        return reply.status(400).send({
-          error: "Invalid query parameter",
-          details: err.issues
-        });
-      }
-      console.error("Search error:", err);
-      return reply.status(500).send();
-    }
-  });
-}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  search
+  Database,
+  db
 });
