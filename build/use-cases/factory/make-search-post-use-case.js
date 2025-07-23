@@ -44,7 +44,7 @@ __export(make_search_post_use_case_exports, {
 });
 module.exports = __toCommonJS(make_search_post_use_case_exports);
 
-// src/lib/pg/db.ts
+// src/lib/db.ts
 var import_pg = require("pg");
 
 // src/env/index.ts
@@ -66,7 +66,7 @@ if (!_env.success) {
 }
 var env = _env.data;
 
-// src/lib/pg/db.ts
+// src/lib/db.ts
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTEGRES_HOST,
@@ -98,6 +98,7 @@ var db = new Database();
 
 // src/repositories/pg/post.repository.ts
 var PostRepository = class {
+  //async create(): Ana TODO 
   findAll() {
     return __async(this, null, function* () {
       var _a;
@@ -107,6 +108,9 @@ var PostRepository = class {
       return (result == null ? void 0 : result.rows) || [];
     });
   }
+  //async findById(): Vitor TODO
+  //async update(): Ana TODO
+  //async delete(): Vitor TODO
   searchQueryString(query) {
     return __async(this, null, function* () {
       var _a;

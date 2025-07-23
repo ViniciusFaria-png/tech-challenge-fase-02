@@ -45,7 +45,7 @@ var __async = (__this, __arguments, generator) => {
 // src/app.ts
 var import_fastify = __toESM(require("fastify"));
 
-// src/lib/pg/db.ts
+// src/lib/db.ts
 var import_pg = require("pg");
 
 // src/env/index.ts
@@ -67,7 +67,7 @@ if (!_env.success) {
 }
 var env = _env.data;
 
-// src/lib/pg/db.ts
+// src/lib/db.ts
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTEGRES_HOST,
@@ -99,6 +99,7 @@ var db = new Database();
 
 // src/repositories/pg/post.repository.ts
 var PostRepository = class {
+  //async create(): Ana TODO 
   findAll() {
     return __async(this, null, function* () {
       var _a;
@@ -108,6 +109,9 @@ var PostRepository = class {
       return (result == null ? void 0 : result.rows) || [];
     });
   }
+  //async findById(): Vitor TODO
+  //async update(): Ana TODO
+  //async delete(): Vitor TODO
   searchQueryString(query) {
     return __async(this, null, function* () {
       var _a;
@@ -170,19 +174,25 @@ var import_zod2 = require("zod");
 function search(request, reply) {
   return __async(this, null, function* () {
     const registerQuerySchema = import_zod2.z.object({
-      query: import_zod2.z.string()
+      query: import_zod2.z.string().min(1, "Query parameter is required")
     });
-    const { query } = registerQuerySchema.parse(request.query);
     try {
+      const { query } = registerQuerySchema.parse(request.query);
       const postRepository = new PostRepository();
       const createSearchUseCase = new SearchQueryStringUseCase(postRepository);
       const post = yield createSearchUseCase.handler(query);
-      if (!post) {
+      if (!post || Array.isArray(post) && post.length === 0) {
         return reply.status(404).send();
       }
       return reply.status(200).send(post);
     } catch (err) {
-      console.log("Not found.");
+      if (err instanceof import_zod2.z.ZodError) {
+        return reply.status(400).send({
+          error: "Invalid query parameter",
+          details: err.issues
+        });
+      }
+      console.error("Search error:", err);
       return reply.status(500).send();
     }
   });
@@ -191,7 +201,7 @@ function search(request, reply) {
 // src/http/controller/post/routes.ts
 function postRoutes(app2) {
   return __async(this, null, function* () {
-    app2.get("/search", search);
+    app2.get("/posts/search", search);
     app2.get("/posts", findAll);
   });
 }

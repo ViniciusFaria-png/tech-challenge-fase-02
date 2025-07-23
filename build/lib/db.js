@@ -37,14 +37,13 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/repositories/pg/post.repository.ts
-var post_repository_exports = {};
-__export(post_repository_exports, {
-  PostRepository: () => PostRepository
-});
-module.exports = __toCommonJS(post_repository_exports);
-
 // src/lib/db.ts
+var db_exports = {};
+__export(db_exports, {
+  Database: () => Database,
+  db: () => db
+});
+module.exports = __toCommonJS(db_exports);
 var import_pg = require("pg");
 
 // src/env/index.ts
@@ -95,34 +94,8 @@ var Database = class {
   }
 };
 var db = new Database();
-
-// src/repositories/pg/post.repository.ts
-var PostRepository = class {
-  //async create(): Ana TODO 
-  findAll() {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post`
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-  //async findById(): Vitor TODO
-  //async update(): Ana TODO
-  //async delete(): Vitor TODO
-  searchQueryString(query) {
-    return __async(this, null, function* () {
-      var _a;
-      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
-        `SELECT * FROM post WHERE titulo ILIKE $1 OR conteudo ILIKE $1`,
-        [`%${query}%`]
-      );
-      return (result == null ? void 0 : result.rows) || [];
-    });
-  }
-};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  PostRepository
+  Database,
+  db
 });
