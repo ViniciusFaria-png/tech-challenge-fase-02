@@ -37,12 +37,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/http/controller/post/routes.ts
-var routes_exports = {};
-__export(routes_exports, {
-  postRoutes: () => postRoutes
+// src/use-cases/factory/make-find-all-posts-use-case.ts
+var make_find_all_posts_use_case_exports = {};
+__export(make_find_all_posts_use_case_exports, {
+  makeFindAllPostsUseCase: () => makeFindAllPostsUseCase
 });
-module.exports = __toCommonJS(routes_exports);
+module.exports = __toCommonJS(make_find_all_posts_use_case_exports);
 
 // src/lib/pg/db.ts
 var import_pg = require("pg");
@@ -140,61 +140,7 @@ function makeFindAllPostsUseCase() {
   const findAllPostsUseCase = new FindAllPostsUseCase(postRepository);
   return findAllPostsUseCase;
 }
-
-// src/http/controller/post/find-all.ts
-function findAll(request, reply) {
-  return __async(this, null, function* () {
-    try {
-      const findAllPostsUseCase = makeFindAllPostsUseCase();
-      const { posts } = yield findAllPostsUseCase.execute();
-      return reply.status(200).send({ posts });
-    } catch (err) {
-      throw err;
-    }
-  });
-}
-
-// src/use-cases/search-post.ts
-var SearchQueryStringUseCase = class {
-  constructor(postRepository) {
-    this.postRepository = postRepository;
-  }
-  handler(query) {
-    return this.postRepository.searchQueryString(query);
-  }
-};
-
-// src/http/controller/post/search.ts
-var import_zod2 = require("zod");
-function search(request, reply) {
-  return __async(this, null, function* () {
-    const registerQuerySchema = import_zod2.z.object({
-      query: import_zod2.z.string()
-    });
-    const { query } = registerQuerySchema.parse(request.query);
-    try {
-      const postRepository = new PostRepository();
-      const createSearchUseCase = new SearchQueryStringUseCase(postRepository);
-      const post = yield createSearchUseCase.handler(query);
-      if (!post) {
-        return reply.status(404).send();
-      }
-      return reply.status(200).send(post);
-    } catch (err) {
-      console.log("Not found.");
-      return reply.status(500).send();
-    }
-  });
-}
-
-// src/http/controller/post/routes.ts
-function postRoutes(app) {
-  return __async(this, null, function* () {
-    app.get("/search", search);
-    app.get("/posts", findAll);
-  });
-}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  postRoutes
+  makeFindAllPostsUseCase
 });
