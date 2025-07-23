@@ -4,24 +4,23 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 
 export async function search(request: FastifyRequest, reply: FastifyReply ){
-    const registerBodySchema = z.object({
+    const registerQuerySchema = z.object({
         query: z.string(),
     })
 
-    const { query } = registerBodySchema.parse(request.body)
+    // For GET, use request.query
+    const { query } = registerQuerySchema.parse(request.query)
 
-    try
-    {
+    try {
         const postRepository = new PostRepository()
-
         const createSearchUseCase = new SearchQueryStringUseCase(postRepository)
-        
         const post = await createSearchUseCase.handler(query)
-        return reply.status(201).send(post)
-    }
-    catch(err)
-    {
+        if (!post) {
+            return reply.status(404).send()
+        }
+        return reply.status(200).send(post)
+    } catch (err) {
         console.log("Not found.")
-        return reply.status(404).send()
+        return reply.status(500).send()
     }
 }
