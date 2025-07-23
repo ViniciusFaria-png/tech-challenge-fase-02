@@ -1,5 +1,12 @@
 # Blog Educacional - Documentação Técnica
 
+## 🤝 GRUPO
+
+* RM 362457  - Alessandra  Guedes
+* RM 362166 - Ana Carolina
+* RM 363723 - Vinicius Faria
+* RM 360942 - Vitor Freire
+
 ## 📋 Visão Geral
 
 O projeto Blog Educacional é uma API REST desenvolvida para gerenciar conteúdo educacional, permitindo que professores publiquem e compartilhem material didático através de posts. O sistema está estruturado seguindo princípios de Clean Architecture e SOLID, garantindo escalabilidade e manutenibilidade.
