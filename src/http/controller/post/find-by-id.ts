@@ -8,25 +8,29 @@ const findPostParamsSchema = z.object({
 });
 
 export async function findById(request: FastifyRequest, reply: FastifyReply) {
-  const { id } = findPostParamsSchema.parse(request.params);
-
   try {
+    const { id } = findPostParamsSchema.parse(request.params);
+
     const findPostByIdUseCase = makeFindPostByIdUseCase();
-    const { post } = await findPostByIdUseCase.execute({
-      postId: id,
-    });
+    const { post } = await findPostByIdUseCase.execute({ postId: id });
 
     return reply.status(200).send({ post });
   } catch (err) {
     if (err instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: "Validation error.",
+        issues: err.issues,
+      });
+    }
     throw err;
   }
 }
 
 export const findByIdPostSchema = {
-  summary: "Retrieve a post by its ID",
+  summary: "Get a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -42,11 +46,15 @@ export const findByIdPostSchema = {
         post: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid" },
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post",
+            },
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
@@ -61,17 +69,30 @@ export const findByIdPostSchema = {
         },
       },
     },
-    404: {
-      type: "object",
-      properties: {
-        message: { type: "string", example: "Resource not found." },
-      },
-    },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" },
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" },
+            },
+            required: ["code", "expected", "received", "path", "message"],
+          },
+        },
+      },
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found" },
       },
     },
   },

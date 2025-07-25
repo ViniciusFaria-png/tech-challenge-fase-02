@@ -1,4 +1,3 @@
-// __tests__/unit/use-cases/find-all-posts.test.ts
 import { FindAllPostsUseCase } from "@/use-cases/find-all-posts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPostList } from "../../setup/mocks/entity-mocks";

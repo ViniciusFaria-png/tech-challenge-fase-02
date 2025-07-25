@@ -8,25 +8,29 @@ const deletePostParamsSchema = z.object({
 });
 
 export async function remove(request: FastifyRequest, reply: FastifyReply) {
-  const { id } = deletePostParamsSchema.parse(request.params);
-
   try {
+    const { id } = deletePostParamsSchema.parse(request.params);
+
     const deletePostUseCase = makeDeletePostUseCase();
-    await deletePostUseCase.execute({
-      postId: id,
-    });
+    await deletePostUseCase.execute({ postId: id });
 
     return reply.status(204).send();
   } catch (err) {
     if (err instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: "Validation error.",
+        issues: err.issues,
+      });
+    }
     throw err;
   }
 }
 
 export const deletePostSchema = {
-  summary: "Delete a post by its ID",
+  summary: "Delete a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -38,19 +42,32 @@ export const deletePostSchema = {
   response: {
     204: {
       type: "null",
-      description: "Successfully deleted the post.",
+      description: "No content",
     },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" },
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" },
+            },
+            required: ["code", "expected", "received", "path", "message"],
+          },
+        },
       },
     },
     404: {
       type: "object",
       properties: {
-        message: { type: "string", example: "Resource not found." },
+        message: { type: "string", example: "Resource not found" },
       },
     },
   },
