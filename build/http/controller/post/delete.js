@@ -52,9 +52,6 @@ var ResourceNotFoundError = class extends Error {
   }
 };
 
-// src/lib/db.ts
-var import_pg = require("pg");
-
 // src/env/index.ts
 var import_config = require("dotenv/config");
 var import_zod = require("zod");
@@ -75,6 +72,7 @@ if (!_env.success) {
 var env = _env.data;
 
 // src/lib/db.ts
+var import_pg = require("pg");
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTGRES_HOST,
@@ -101,6 +99,17 @@ var Database = class {
   }
   get clientInstance() {
     return this.client;
+  }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
   }
 };
 var db = new Database();
@@ -221,23 +230,27 @@ var deletePostParamsSchema = import_zod2.z.object({
 });
 function remove(request, reply) {
   return __async(this, null, function* () {
-    const { id } = deletePostParamsSchema.parse(request.params);
     try {
+      const { id } = deletePostParamsSchema.parse(request.params);
       const deletePostUseCase = makeDeletePostUseCase();
-      yield deletePostUseCase.execute({
-        postId: id
-      });
+      yield deletePostUseCase.execute({ postId: id });
       return reply.status(204).send();
     } catch (err) {
       if (err instanceof ResourceNotFoundError) {
         return reply.status(404).send({ message: err.message });
+      }
+      if (err instanceof import_zod2.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
       }
       throw err;
     }
   });
 }
 var deletePostSchema = {
-  summary: "Delete a post by its ID",
+  summary: "Delete a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -249,19 +262,32 @@ var deletePostSchema = {
   response: {
     204: {
       type: "null",
-      description: "Successfully deleted the post."
+      description: "No content"
     },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" }
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" }
+            },
+            required: ["code", "expected", "received", "path", "message"]
+          }
+        }
       }
     },
     404: {
       type: "object",
       properties: {
-        message: { type: "string", example: "Resource not found." }
+        message: { type: "string", example: "Resource not found" }
       }
     }
   }

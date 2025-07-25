@@ -121,6 +121,17 @@ var Database = class {
   get clientInstance() {
     return this.client;
   }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
+  }
 };
 var db = new Database();
 
@@ -355,23 +366,27 @@ var findPostParamsSchema = import_zod3.z.object({
 });
 function findById(request, reply) {
   return __async(this, null, function* () {
-    const { id } = findPostParamsSchema.parse(request.params);
     try {
+      const { id } = findPostParamsSchema.parse(request.params);
       const findPostByIdUseCase = makeFindPostByIdUseCase();
-      const { post } = yield findPostByIdUseCase.execute({
-        postId: id
-      });
+      const { post } = yield findPostByIdUseCase.execute({ postId: id });
       return reply.status(200).send({ post });
     } catch (err) {
       if (err instanceof ResourceNotFoundError) {
         return reply.status(404).send({ message: err.message });
+      }
+      if (err instanceof import_zod3.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
       }
       throw err;
     }
   });
 }
 var findByIdPostSchema = {
-  summary: "Retrieve a post by its ID",
+  summary: "Get a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -387,11 +402,15 @@ var findByIdPostSchema = {
         post: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid" },
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post"
+            },
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" }
           },
@@ -406,17 +425,30 @@ var findByIdPostSchema = {
         }
       }
     },
-    404: {
-      type: "object",
-      properties: {
-        message: { type: "string", example: "Resource not found." }
-      }
-    },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" }
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" }
+            },
+            required: ["code", "expected", "received", "path", "message"]
+          }
+        }
+      }
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found" }
       }
     }
   }
@@ -462,15 +494,19 @@ var import_zod4 = require("zod");
 var createPostBodySchema = import_zod4.z.object({
   titulo: import_zod4.z.string().min(1, "Title is required."),
   resumo: import_zod4.z.string().optional(),
-  conteudo: import_zod4.z.string().min(1, "Content is required."),
-  professor_id: import_zod4.z.number().int().positive()
+  conteudo: import_zod4.z.string().min(1, "Content is required.")
 });
 function create(request, reply) {
   return __async(this, null, function* () {
-    const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
-      request.body
-    );
+    var _a;
     try {
+      const { titulo, resumo, conteudo } = createPostBodySchema.parse(
+        request.body
+      );
+      const professor_id = parseInt(((_a = request.user) == null ? void 0 : _a.professor_id) || "0");
+      if (!professor_id) {
+        return reply.status(401).send({ message: "User not authenticated or invalid professor ID" });
+      }
       const createPostUseCase = makeCreatePostUseCase();
       const { post } = yield createPostUseCase.execute({
         titulo,
@@ -480,6 +516,12 @@ function create(request, reply) {
       });
       return reply.status(201).send({ post });
     } catch (err) {
+      if (err instanceof import_zod4.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
+      }
       throw err;
     }
   });
@@ -492,10 +534,9 @@ var createPostSchema = {
     properties: {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
-      conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "number", minimum: 1 }
+      conteudo: { type: "string", minLength: 1 }
     },
-    required: ["titulo", "conteudo", "professor_id"]
+    required: ["titulo", "conteudo"]
   },
   response: {
     201: {
@@ -534,6 +575,15 @@ var createPostSchema = {
         issues: {
           type: "object",
           description: "Details about validation errors"
+        }
+      }
+    },
+    401: {
+      type: "object",
+      properties: {
+        message: {
+          type: "string",
+          example: "User not authenticated or invalid professor ID"
         }
       }
     }
@@ -583,12 +633,9 @@ var updatePostBodySchema = import_zod5.z.object({
 }).partial();
 function update(request, reply) {
   return __async(this, null, function* () {
-    const { id } = updatePostParamsSchema.parse(request.params);
-    const data = updatePostBodySchema.parse(request.body);
-    if (Object.keys(data).length === 0) {
-      return reply.status(400).send({ message: "No fields provided for update." });
-    }
     try {
+      const { id } = updatePostParamsSchema.parse(request.params);
+      const data = updatePostBodySchema.parse(request.body);
       const updatePostUseCase = makeUpdatePostUseCase();
       const { post } = yield updatePostUseCase.execute(__spreadValues({
         postId: id
@@ -598,12 +645,18 @@ function update(request, reply) {
       if (err instanceof ResourceNotFoundError) {
         return reply.status(404).send({ message: err.message });
       }
+      if (err instanceof import_zod5.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
+      }
       throw err;
     }
   });
 }
 var updatePostSchema = {
-  summary: "Update an existing post",
+  summary: "Update a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -620,7 +673,7 @@ var updatePostSchema = {
       conteudo: { type: "string", minLength: 1 },
       professor_id: { type: "number", minimum: 1 }
     },
-    additionalProperties: false
+    minProperties: 1
   },
   response: {
     200: {
@@ -629,11 +682,15 @@ var updatePostSchema = {
         post: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid" },
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post"
+            },
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" }
           },
@@ -651,14 +708,27 @@ var updatePostSchema = {
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" }
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" }
+            },
+            required: ["code", "expected", "received", "path", "message"]
+          }
+        }
       }
     },
     404: {
       type: "object",
       properties: {
-        message: { type: "string", example: "Resource not found." }
+        message: { type: "string", example: "Resource not found" }
       }
     }
   }
@@ -696,23 +766,27 @@ var deletePostParamsSchema = import_zod6.z.object({
 });
 function remove(request, reply) {
   return __async(this, null, function* () {
-    const { id } = deletePostParamsSchema.parse(request.params);
     try {
+      const { id } = deletePostParamsSchema.parse(request.params);
       const deletePostUseCase = makeDeletePostUseCase();
-      yield deletePostUseCase.execute({
-        postId: id
-      });
+      yield deletePostUseCase.execute({ postId: id });
       return reply.status(204).send();
     } catch (err) {
       if (err instanceof ResourceNotFoundError) {
         return reply.status(404).send({ message: err.message });
+      }
+      if (err instanceof import_zod6.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
       }
       throw err;
     }
   });
 }
 var deletePostSchema = {
-  summary: "Delete a post by its ID",
+  summary: "Delete a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -724,19 +798,32 @@ var deletePostSchema = {
   response: {
     204: {
       type: "null",
-      description: "Successfully deleted the post."
+      description: "No content"
     },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" }
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" }
+            },
+            required: ["code", "expected", "received", "path", "message"]
+          }
+        }
       }
     },
     404: {
       type: "object",
       properties: {
-        message: { type: "string", example: "Resource not found." }
+        message: { type: "string", example: "Resource not found" }
       }
     }
   }

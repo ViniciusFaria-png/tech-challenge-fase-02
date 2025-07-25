@@ -45,9 +45,6 @@ __export(create_exports, {
 });
 module.exports = __toCommonJS(create_exports);
 
-// src/lib/db.ts
-var import_pg = require("pg");
-
 // src/env/index.ts
 var import_config = require("dotenv/config");
 var import_zod = require("zod");
@@ -68,6 +65,7 @@ if (!_env.success) {
 var env = _env.data;
 
 // src/lib/db.ts
+var import_pg = require("pg");
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTGRES_HOST,
@@ -94,6 +92,17 @@ var Database = class {
   }
   get clientInstance() {
     return this.client;
+  }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
   }
 };
 var db = new Database();
@@ -222,15 +231,19 @@ var import_zod2 = require("zod");
 var createPostBodySchema = import_zod2.z.object({
   titulo: import_zod2.z.string().min(1, "Title is required."),
   resumo: import_zod2.z.string().optional(),
-  conteudo: import_zod2.z.string().min(1, "Content is required."),
-  professor_id: import_zod2.z.number().int().positive()
+  conteudo: import_zod2.z.string().min(1, "Content is required.")
 });
 function create(request, reply) {
   return __async(this, null, function* () {
-    const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
-      request.body
-    );
+    var _a;
     try {
+      const { titulo, resumo, conteudo } = createPostBodySchema.parse(
+        request.body
+      );
+      const professor_id = parseInt(((_a = request.user) == null ? void 0 : _a.professor_id) || "0");
+      if (!professor_id) {
+        return reply.status(401).send({ message: "User not authenticated or invalid professor ID" });
+      }
       const createPostUseCase = makeCreatePostUseCase();
       const { post } = yield createPostUseCase.execute({
         titulo,
@@ -240,6 +253,12 @@ function create(request, reply) {
       });
       return reply.status(201).send({ post });
     } catch (err) {
+      if (err instanceof import_zod2.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
+      }
       throw err;
     }
   });
@@ -252,10 +271,9 @@ var createPostSchema = {
     properties: {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
-      conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "number", minimum: 1 }
+      conteudo: { type: "string", minLength: 1 }
     },
-    required: ["titulo", "conteudo", "professor_id"]
+    required: ["titulo", "conteudo"]
   },
   response: {
     201: {
@@ -294,6 +312,15 @@ var createPostSchema = {
         issues: {
           type: "object",
           description: "Details about validation errors"
+        }
+      }
+    },
+    401: {
+      type: "object",
+      properties: {
+        message: {
+          type: "string",
+          example: "User not authenticated or invalid professor ID"
         }
       }
     }

@@ -44,7 +44,6 @@ __export(db_exports, {
   db: () => db
 });
 module.exports = __toCommonJS(db_exports);
-var import_pg = require("pg");
 
 // src/env/index.ts
 var import_config = require("dotenv/config");
@@ -66,6 +65,7 @@ if (!_env.success) {
 var env = _env.data;
 
 // src/lib/db.ts
+var import_pg = require("pg");
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTGRES_HOST,
@@ -92,6 +92,17 @@ var Database = class {
   }
   get clientInstance() {
     return this.client;
+  }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
   }
 };
 var db = new Database();
