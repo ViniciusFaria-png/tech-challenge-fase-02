@@ -58,6 +58,7 @@ describe("Find Post By ID Controller", () => {
 
   it("should return 400 if validation fails (invalid post ID format)", async () => {
     request.params = { id: "invalid-uuid" };
+    const executeSpy = vi.spyOn(findPostByIdUseCaseMock, "execute");
 
     await findById(request, reply);
 

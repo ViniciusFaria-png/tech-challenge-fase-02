@@ -31,6 +31,16 @@ export class Database {
   get clientInstance() {
     return this.client;
   }
+
+  async query(text: string, params?: any[]) {
+    if (!this.client) {
+      await this.connection();
+    }
+    if (!this.client) {
+      throw new Error("Cliente do banco não está conectado.");
+    }
+    return this.client.query(text, params);
+  }
 }
 
 export const db = new Database();
