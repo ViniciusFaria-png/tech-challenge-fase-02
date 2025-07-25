@@ -3,6 +3,7 @@ name: Build and Publish Docker Image
 on:
   push:
     branches:
+      - main
       - Feature/getWithSearch
 
 jobs:
@@ -54,7 +55,7 @@ jobs:
             echo "Waiting for PostgreSQL..."
             sleep 5
           done
-          
+
       - name: Run Vitest
         run: npx vitest run
   build-and-publish:
