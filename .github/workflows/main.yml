@@ -22,7 +22,7 @@ jobs:
 
       - name: Build and run with Docker Compose
         env:
-          secretsIRONMENT: ${{ secrets.secretsIRONMENT }}
+          ENV: ${{ secrets.ENV }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
