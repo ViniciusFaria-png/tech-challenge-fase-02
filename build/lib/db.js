@@ -55,7 +55,7 @@ var envSchema = import_zod.z.object({
   POSTGRES_DB: import_zod.z.string(),
   POSTGRES_USER: import_zod.z.string(),
   POSTGRES_PASSWORD: import_zod.z.string(),
-  POSTEGRES_HOST: import_zod.z.string().default("0.0.0.0"),
+  POSTGRES_HOST: import_zod.z.string().default("db"),
   POSTGRES_PORT: import_zod.z.coerce.number()
 });
 var _env = envSchema.safeParse(process.env);
@@ -68,7 +68,7 @@ var env = _env.data;
 // src/lib/db.ts
 var CONFIG = {
   user: env.POSTGRES_USER,
-  host: env.POSTEGRES_HOST,
+  host: env.POSTGRES_HOST,
   database: env.POSTGRES_DB,
   password: env.POSTGRES_PASSWORD,
   port: env.POSTGRES_PORT
@@ -83,6 +83,7 @@ var Database = class {
       var _a;
       try {
         (_a = this.client) != null ? _a : this.client = yield this.pool.connect();
+        console.log("Conex\xE3o com o banco de dados estabelecida com sucesso.");
       } catch (error) {
         console.error("Error ao conectar ao banco de dados:", error);
         throw error;

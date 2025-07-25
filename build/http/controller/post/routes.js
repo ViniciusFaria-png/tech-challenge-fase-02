@@ -2,7 +2,33 @@
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -56,7 +82,7 @@ var envSchema = import_zod.z.object({
   POSTGRES_DB: import_zod.z.string(),
   POSTGRES_USER: import_zod.z.string(),
   POSTGRES_PASSWORD: import_zod.z.string(),
-  POSTEGRES_HOST: import_zod.z.string().default("0.0.0.0"),
+  POSTGRES_HOST: import_zod.z.string().default("db"),
   POSTGRES_PORT: import_zod.z.coerce.number()
 });
 var _env = envSchema.safeParse(process.env);
@@ -69,7 +95,7 @@ var env = _env.data;
 // src/lib/db.ts
 var CONFIG = {
   user: env.POSTGRES_USER,
-  host: env.POSTEGRES_HOST,
+  host: env.POSTGRES_HOST,
   database: env.POSTGRES_DB,
   password: env.POSTGRES_PASSWORD,
   port: env.POSTGRES_PORT
@@ -84,6 +110,7 @@ var Database = class {
       var _a;
       try {
         (_a = this.client) != null ? _a : this.client = yield this.pool.connect();
+        console.log("Conex\xE3o com o banco de dados estabelecida com sucesso.");
       } catch (error) {
         console.error("Error ao conectar ao banco de dados:", error);
         throw error;
@@ -98,7 +125,18 @@ var db = new Database();
 
 // src/repositories/pg/post.repository.ts
 var PostRepository = class {
-  //async create(): Ana TODO 
+  create(data) {
+    return __async(this, null, function* () {
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `INSERT INTO post (titulo, resumo, conteudo, professor_id, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, NOW(), NOW())
+       RETURNING id, titulo, resumo, conteudo, professor_id, created_at, updated_at`,
+        [data.titulo, data.resumo, data.conteudo, data.professor_id]
+      );
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
   findAll() {
     return __async(this, null, function* () {
       var _a;
@@ -108,9 +146,55 @@ var PostRepository = class {
       return (result == null ? void 0 : result.rows) || [];
     });
   }
-  //async findById(): Vitor TODO
-  //async update(): Ana TODO
-  //async delete(): Vitor TODO
+  findById(id) {
+    return __async(this, null, function* () {
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post WHERE id = $1`,
+        [id]
+      );
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
+  update(id, data) {
+    return __async(this, null, function* () {
+      var _a;
+      const fields = [];
+      const values = [];
+      let paramIndex = 1;
+      if (data.titulo !== void 0) {
+        fields.push(`titulo = $${paramIndex++}`);
+        values.push(data.titulo);
+      }
+      if (data.resumo !== void 0) {
+        fields.push(`resumo = $${paramIndex++}`);
+        values.push(data.resumo);
+      }
+      if (data.conteudo !== void 0) {
+        fields.push(`conteudo = $${paramIndex++}`);
+        values.push(data.conteudo);
+      }
+      if (data.professor_id !== void 0) {
+        fields.push(`professor_id = $${paramIndex++}`);
+        values.push(data.professor_id);
+      }
+      fields.push(`updated_at = NOW()`);
+      values.push(id);
+      if (fields.length === 0) {
+        return this.findById(id);
+      }
+      const setClause = fields.join(", ");
+      const query = `UPDATE post SET ${setClause} WHERE id = $${paramIndex} RETURNING id, titulo, resumo, conteudo, professor_id, created_at, updated_at`;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(query, values);
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
+  delete(id) {
+    return __async(this, null, function* () {
+      var _a;
+      yield (_a = db.clientInstance) == null ? void 0 : _a.query(`DELETE FROM post WHERE id = $1`, [id]);
+    });
+  }
   searchQueryString(query) {
     return __async(this, null, function* () {
       var _a;
@@ -157,6 +241,38 @@ function findAll(request, reply) {
     }
   });
 }
+var findAllPostsSchema = {
+  summary: "Retrieve all posts",
+  tags: ["Posts"],
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        posts: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              titulo: { type: "string" },
+              resumo: { type: "string", nullable: true },
+              conteudo: { type: "string" },
+              professor_id: { type: "number" },
+              created_at: { type: "string", format: "date-time" },
+              updated_at: { type: "string", format: "date-time" }
+            }
+          }
+        }
+      }
+    },
+    500: {
+      type: "object",
+      properties: {
+        message: { type: "string" }
+      }
+    }
+  }
+};
 
 // src/use-cases/search-post.ts
 var SearchQueryStringUseCase = class {
@@ -197,11 +313,443 @@ function search(request, reply) {
   });
 }
 
+// src/use-cases/errors/resource-not-found-error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource not found");
+  }
+};
+
+// src/use-cases/find-post-by-id.ts
+var FindPostByIdUseCase = class {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+  execute(_0) {
+    return __async(this, arguments, function* ({
+      postId
+    }) {
+      const post = yield this.postRepository.findById(postId);
+      if (!post) {
+        throw new ResourceNotFoundError();
+      }
+      return {
+        post
+      };
+    });
+  }
+};
+
+// src/use-cases/factory/make-find-post-by-id-use-case.ts
+function makeFindPostByIdUseCase() {
+  const postRepository = new PostRepository();
+  const useCase = new FindPostByIdUseCase(postRepository);
+  return useCase;
+}
+
+// src/http/controller/post/find-by-id.ts
+var import_zod3 = require("zod");
+var findPostParamsSchema = import_zod3.z.object({
+  id: import_zod3.z.string().uuid("Invalid post ID format.")
+});
+function findById(request, reply) {
+  return __async(this, null, function* () {
+    const { id } = findPostParamsSchema.parse(request.params);
+    try {
+      const findPostByIdUseCase = makeFindPostByIdUseCase();
+      const { post } = yield findPostByIdUseCase.execute({
+        postId: id
+      });
+      return reply.status(200).send({ post });
+    } catch (err) {
+      if (err instanceof ResourceNotFoundError) {
+        return reply.status(404).send({ message: err.message });
+      }
+      throw err;
+    }
+  });
+}
+var findByIdPostSchema = {
+  summary: "Retrieve a post by its ID",
+  tags: ["Posts"],
+  params: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" }
+    },
+    required: ["id"]
+  },
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        post: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            titulo: { type: "string" },
+            resumo: { type: "string", nullable: true },
+            conteudo: { type: "string" },
+            professor_id: { type: "number" },
+            created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" }
+          },
+          required: [
+            "id",
+            "titulo",
+            "conteudo",
+            "professor_id",
+            "created_at",
+            "updated_at"
+          ]
+        }
+      }
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found." }
+      }
+    },
+    400: {
+      type: "object",
+      properties: {
+        message: { type: "string" },
+        issues: { type: "object" }
+      }
+    }
+  }
+};
+
+// src/use-cases/create-post.ts
+var CreatePostUseCase = class {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+  execute(_0) {
+    return __async(this, arguments, function* ({
+      titulo,
+      resumo,
+      conteudo,
+      professor_id
+    }) {
+      const post = yield this.postRepository.create({
+        titulo,
+        resumo,
+        conteudo,
+        professor_id
+      });
+      if (!post) {
+        throw new Error("Failed to create post.");
+      }
+      return {
+        post
+      };
+    });
+  }
+};
+
+// src/use-cases/factory/make-create-post-use-case.ts
+function makeCreatePostUseCase() {
+  const postRepository = new PostRepository();
+  const useCase = new CreatePostUseCase(postRepository);
+  return useCase;
+}
+
+// src/http/controller/post/create.ts
+var import_zod4 = require("zod");
+var createPostBodySchema = import_zod4.z.object({
+  titulo: import_zod4.z.string().min(1, "Title is required."),
+  resumo: import_zod4.z.string().optional(),
+  conteudo: import_zod4.z.string().min(1, "Content is required."),
+  professor_id: import_zod4.z.number().int().positive()
+});
+function create(request, reply) {
+  return __async(this, null, function* () {
+    const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
+      request.body
+    );
+    try {
+      const createPostUseCase = makeCreatePostUseCase();
+      const { post } = yield createPostUseCase.execute({
+        titulo,
+        resumo,
+        conteudo,
+        professor_id
+      });
+      return reply.status(201).send({ post });
+    } catch (err) {
+      throw err;
+    }
+  });
+}
+var createPostSchema = {
+  summary: "Create a new post",
+  tags: ["Posts"],
+  body: {
+    type: "object",
+    properties: {
+      titulo: { type: "string", minLength: 1 },
+      resumo: { type: "string" },
+      conteudo: { type: "string", minLength: 1 },
+      professor_id: { type: "number", minimum: 1 }
+    },
+    required: ["titulo", "conteudo", "professor_id"]
+  },
+  response: {
+    201: {
+      type: "object",
+      properties: {
+        post: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post"
+            },
+            titulo: { type: "string" },
+            resumo: { type: "string", nullable: true },
+            conteudo: { type: "string" },
+            professor_id: { type: "number", format: "int32" },
+            created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" }
+          },
+          required: [
+            "id",
+            "titulo",
+            "conteudo",
+            "professor_id",
+            "created_at",
+            "updated_at"
+          ]
+        }
+      }
+    },
+    400: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "object",
+          description: "Details about validation errors"
+        }
+      }
+    }
+  }
+};
+
+// src/use-cases/update-post.ts
+var UpdatePostUseCase = class {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+  execute(_a) {
+    return __async(this, null, function* () {
+      var _b = _a, {
+        postId
+      } = _b, data = __objRest(_b, [
+        "postId"
+      ]);
+      const post = yield this.postRepository.update(postId, data);
+      if (!post) {
+        throw new ResourceNotFoundError();
+      }
+      return {
+        post
+      };
+    });
+  }
+};
+
+// src/use-cases/factory/make-update-post-use-case.ts
+function makeUpdatePostUseCase() {
+  const postRepository = new PostRepository();
+  const useCase = new UpdatePostUseCase(postRepository);
+  return useCase;
+}
+
+// src/http/controller/post/update.ts
+var import_zod5 = require("zod");
+var updatePostParamsSchema = import_zod5.z.object({
+  id: import_zod5.z.string().uuid("Invalid post ID format.")
+});
+var updatePostBodySchema = import_zod5.z.object({
+  titulo: import_zod5.z.string().min(1, "Title cannot be empty.").optional(),
+  resumo: import_zod5.z.string().optional(),
+  conteudo: import_zod5.z.string().min(1, "Content cannot be empty.").optional(),
+  professor_id: import_zod5.z.number().int().positive().optional()
+}).partial();
+function update(request, reply) {
+  return __async(this, null, function* () {
+    const { id } = updatePostParamsSchema.parse(request.params);
+    const data = updatePostBodySchema.parse(request.body);
+    if (Object.keys(data).length === 0) {
+      return reply.status(400).send({ message: "No fields provided for update." });
+    }
+    try {
+      const updatePostUseCase = makeUpdatePostUseCase();
+      const { post } = yield updatePostUseCase.execute(__spreadValues({
+        postId: id
+      }, data));
+      return reply.status(200).send({ post });
+    } catch (err) {
+      if (err instanceof ResourceNotFoundError) {
+        return reply.status(404).send({ message: err.message });
+      }
+      throw err;
+    }
+  });
+}
+var updatePostSchema = {
+  summary: "Update an existing post",
+  tags: ["Posts"],
+  params: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" }
+    },
+    required: ["id"]
+  },
+  body: {
+    type: "object",
+    properties: {
+      titulo: { type: "string", minLength: 1 },
+      resumo: { type: "string" },
+      conteudo: { type: "string", minLength: 1 },
+      professor_id: { type: "number", minimum: 1 }
+    },
+    additionalProperties: false
+  },
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        post: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            titulo: { type: "string" },
+            resumo: { type: "string", nullable: true },
+            conteudo: { type: "string" },
+            professor_id: { type: "number" },
+            created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" }
+          },
+          required: [
+            "id",
+            "titulo",
+            "conteudo",
+            "professor_id",
+            "created_at",
+            "updated_at"
+          ]
+        }
+      }
+    },
+    400: {
+      type: "object",
+      properties: {
+        message: { type: "string" },
+        issues: { type: "object" }
+      }
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found." }
+      }
+    }
+  }
+};
+
+// src/use-cases/delete-post.ts
+var DeletePostUseCase = class {
+  constructor(postRepository) {
+    this.postRepository = postRepository;
+  }
+  execute(_0) {
+    return __async(this, arguments, function* ({
+      postId
+    }) {
+      const postExists = yield this.postRepository.findById(postId);
+      if (!postExists) {
+        throw new ResourceNotFoundError();
+      }
+      yield this.postRepository.delete(postId);
+    });
+  }
+};
+
+// src/use-cases/factory/make-delete-post-use-case.ts
+function makeDeletePostUseCase() {
+  const postRepository = new PostRepository();
+  const useCase = new DeletePostUseCase(postRepository);
+  return useCase;
+}
+
+// src/http/controller/post/delete.ts
+var import_zod6 = require("zod");
+var deletePostParamsSchema = import_zod6.z.object({
+  id: import_zod6.z.string().uuid("Invalid post ID format.")
+});
+function remove(request, reply) {
+  return __async(this, null, function* () {
+    const { id } = deletePostParamsSchema.parse(request.params);
+    try {
+      const deletePostUseCase = makeDeletePostUseCase();
+      yield deletePostUseCase.execute({
+        postId: id
+      });
+      return reply.status(204).send();
+    } catch (err) {
+      if (err instanceof ResourceNotFoundError) {
+        return reply.status(404).send({ message: err.message });
+      }
+      throw err;
+    }
+  });
+}
+var deletePostSchema = {
+  summary: "Delete a post by its ID",
+  tags: ["Posts"],
+  params: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" }
+    },
+    required: ["id"]
+  },
+  response: {
+    204: {
+      type: "null",
+      description: "Successfully deleted the post."
+    },
+    400: {
+      type: "object",
+      properties: {
+        message: { type: "string" },
+        issues: { type: "object" }
+      }
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found." }
+      }
+    }
+  }
+};
+
 // src/http/controller/post/routes.ts
 function postRoutes(app) {
   return __async(this, null, function* () {
     app.get("/posts/search", search);
-    app.get("/posts", findAll);
+    app.post("/posts", { schema: createPostSchema }, create);
+    app.get("/posts/:id", { schema: findByIdPostSchema }, findById);
+    app.get("/posts", { schema: findAllPostsSchema }, findAll);
+    app.put("/posts/:id", { schema: updatePostSchema }, update);
+    app.delete("/posts/:id", { schema: deletePostSchema }, remove);
   });
 }
 // Annotate the CommonJS export names for ESM import in node:
