@@ -1,3 +1,4 @@
+// src/http/controller/post/update.ts
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
 import { makeUpdatePostUseCase } from "@/use-cases/factory/make-update-post-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -17,16 +18,16 @@ const updatePostBodySchema = z
   .partial();
 
 export async function update(request: FastifyRequest, reply: FastifyReply) {
-  const { id } = updatePostParamsSchema.parse(request.params);
-  const data = updatePostBodySchema.parse(request.body);
-
-  if (Object.keys(data).length === 0) {
-    return reply
-      .status(400)
-      .send({ message: "No fields provided for update." });
-  }
-
   try {
+    const { id } = updatePostParamsSchema.parse(request.params);
+    const data = updatePostBodySchema.parse(request.body);
+
+    if (Object.keys(data).length === 0) {
+      return reply
+        .status(400)
+        .send({ message: "No fields provided for update." });
+    }
+
     const updatePostUseCase = makeUpdatePostUseCase();
     const { post } = await updatePostUseCase.execute({
       postId: id,
@@ -38,12 +39,18 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
     if (err instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: err.message });
     }
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: "Validation error.",
+        issues: err.issues,
+      });
+    }
     throw err;
   }
 }
 
 export const updatePostSchema = {
-  summary: "Update an existing post",
+  summary: "Update a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -60,7 +67,7 @@ export const updatePostSchema = {
       conteudo: { type: "string", minLength: 1 },
       professor_id: { type: "number", minimum: 1 },
     },
-    additionalProperties: false,
+    minProperties: 1, // At least one property is required for update
   },
   response: {
     200: {
@@ -69,11 +76,15 @@ export const updatePostSchema = {
         post: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid" },
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post",
+            },
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
@@ -91,14 +102,27 @@ export const updatePostSchema = {
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" },
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" },
+            },
+            required: ["code", "expected", "received", "path", "message"],
+          },
+        },
       },
     },
     404: {
       type: "object",
       properties: {
-        message: { type: "string", example: "Resource not found." },
+        message: { type: "string", example: "Resource not found" },
       },
     },
   },

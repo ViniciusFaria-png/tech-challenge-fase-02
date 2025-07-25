@@ -10,11 +10,9 @@ const createPostBodySchema = z.object({
 });
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
-  const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
-    request.body
-  );
-
   try {
+    const { titulo, resumo, conteudo, professor_id } =
+      createPostBodySchema.parse(request.body);
     const createPostUseCase = makeCreatePostUseCase();
     const { post } = await createPostUseCase.execute({
       titulo,
@@ -25,6 +23,12 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
 
     return reply.status(201).send({ post });
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return reply.status(400).send({
+        message: "Validation error.",
+        issues: err.issues,
+      });
+    }
     throw err;
   }
 }

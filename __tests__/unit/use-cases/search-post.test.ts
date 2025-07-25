@@ -1,4 +1,3 @@
-// __tests__/unit/use-cases/search-post.test.ts
 import { SearchQueryStringUseCase } from "@/use-cases/search-post";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPostList } from "../../setup/mocks/entity-mocks";
