@@ -40,12 +40,10 @@ var __async = (__this, __arguments, generator) => {
 // src/http/controller/post/search.ts
 var search_exports = {};
 __export(search_exports, {
-  search: () => search
+  search: () => search,
+  searchPostSchema: () => searchPostSchema
 });
 module.exports = __toCommonJS(search_exports);
-
-// src/lib/db.ts
-var import_pg = require("pg");
 
 // src/env/index.ts
 var import_config = require("dotenv/config");
@@ -56,7 +54,7 @@ var envSchema = import_zod.z.object({
   POSTGRES_DB: import_zod.z.string(),
   POSTGRES_USER: import_zod.z.string(),
   POSTGRES_PASSWORD: import_zod.z.string(),
-  POSTEGRES_HOST: import_zod.z.string().default("0.0.0.0"),
+  POSTGRES_HOST: import_zod.z.string().default("db"),
   POSTGRES_PORT: import_zod.z.coerce.number()
 });
 var _env = envSchema.safeParse(process.env);
@@ -67,9 +65,10 @@ if (!_env.success) {
 var env = _env.data;
 
 // src/lib/db.ts
+var import_pg = require("pg");
 var CONFIG = {
   user: env.POSTGRES_USER,
-  host: env.POSTEGRES_HOST,
+  host: env.POSTGRES_HOST,
   database: env.POSTGRES_DB,
   password: env.POSTGRES_PASSWORD,
   port: env.POSTGRES_PORT
@@ -84,6 +83,7 @@ var Database = class {
       var _a;
       try {
         (_a = this.client) != null ? _a : this.client = yield this.pool.connect();
+        console.log("Conex\xE3o com o banco de dados estabelecida com sucesso.");
       } catch (error) {
         console.error("Error ao conectar ao banco de dados:", error);
         throw error;
@@ -93,12 +93,34 @@ var Database = class {
   get clientInstance() {
     return this.client;
   }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
+  }
 };
 var db = new Database();
 
 // src/repositories/pg/post.repository.ts
 var PostRepository = class {
-  //async create(): Ana TODO 
+  create(data) {
+    return __async(this, null, function* () {
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `INSERT INTO post (titulo, resumo, conteudo, professor_id, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, NOW(), NOW())
+       RETURNING id, titulo, resumo, conteudo, professor_id, created_at, updated_at`,
+        [data.titulo, data.resumo, data.conteudo, data.professor_id]
+      );
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
   findAll() {
     return __async(this, null, function* () {
       var _a;
@@ -108,9 +130,55 @@ var PostRepository = class {
       return (result == null ? void 0 : result.rows) || [];
     });
   }
-  //async findById(): Vitor TODO
-  //async update(): Ana TODO
-  //async delete(): Vitor TODO
+  findById(id) {
+    return __async(this, null, function* () {
+      var _a;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(
+        `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post WHERE id = $1`,
+        [id]
+      );
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
+  update(id, data) {
+    return __async(this, null, function* () {
+      var _a;
+      const fields = [];
+      const values = [];
+      let paramIndex = 1;
+      if (data.titulo !== void 0) {
+        fields.push(`titulo = $${paramIndex++}`);
+        values.push(data.titulo);
+      }
+      if (data.resumo !== void 0) {
+        fields.push(`resumo = $${paramIndex++}`);
+        values.push(data.resumo);
+      }
+      if (data.conteudo !== void 0) {
+        fields.push(`conteudo = $${paramIndex++}`);
+        values.push(data.conteudo);
+      }
+      if (data.professor_id !== void 0) {
+        fields.push(`professor_id = $${paramIndex++}`);
+        values.push(data.professor_id);
+      }
+      fields.push(`updated_at = NOW()`);
+      values.push(id);
+      if (fields.length === 0) {
+        return this.findById(id);
+      }
+      const setClause = fields.join(", ");
+      const query = `UPDATE post SET ${setClause} WHERE id = $${paramIndex} RETURNING id, titulo, resumo, conteudo, professor_id, created_at, updated_at`;
+      const result = yield (_a = db.clientInstance) == null ? void 0 : _a.query(query, values);
+      return result == null ? void 0 : result.rows[0];
+    });
+  }
+  delete(id) {
+    return __async(this, null, function* () {
+      var _a;
+      yield (_a = db.clientInstance) == null ? void 0 : _a.query(`DELETE FROM post WHERE id = $1`, [id]);
+    });
+  }
   searchQueryString(query) {
     return __async(this, null, function* () {
       var _a;
@@ -161,7 +229,70 @@ function search(request, reply) {
     }
   });
 }
+var searchQuerystringOpenApiSchema = {
+  type: "object",
+  properties: {
+    q: {
+      type: "string",
+      description: "Search query string for post titles or content",
+      minLength: 1
+    }
+  },
+  required: ["q"]
+};
+var searchPostSchema = {
+  summary: "Search for posts by title or content",
+  tags: ["Posts"],
+  querystring: searchQuerystringOpenApiSchema,
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        posts: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              titulo: { type: "string" },
+              resumo: { type: "string", nullable: true },
+              conteudo: { type: "string" },
+              professor_id: { type: "number", format: "int32" },
+              created_at: { type: "string", format: "date-time" },
+              updated_at: { type: "string", format: "date-time" }
+            },
+            required: [
+              "id",
+              "titulo",
+              "conteudo",
+              "professor_id",
+              "created_at",
+              "updated_at"
+            ]
+          }
+        }
+      }
+    },
+    400: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "object",
+          description: "Details about validation errors from Zod"
+        }
+      }
+    },
+    500: {
+      type: "object",
+      properties: {
+        message: { type: "string" }
+      }
+    }
+  }
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  search
+  search,
+  searchPostSchema
 });
