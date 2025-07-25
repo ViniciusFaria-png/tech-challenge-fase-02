@@ -20,6 +20,8 @@ describe("Create Post Controller", () => {
     reply = mockReply();
     createPostUseCaseMock = new CreatePostUseCase(mockPostRepository);
 
+    vi.spyOn(createPostUseCaseMock, "execute");
+
     vi.mocked(makeCreatePostUseCase).mockReturnValue(createPostUseCaseMock);
   });
 
@@ -28,11 +30,12 @@ describe("Create Post Controller", () => {
       titulo: "New Post Title",
       resumo: "New Post Summary",
       conteudo: "New Post Content",
-      professor_id: 1,
     };
-    const createdPost = mockPost(postData);
+    const professor_id = 1;
+    const createdPost = mockPost({ ...postData, professor_id });
 
     request.body = postData;
+    request.user = { professor_id: professor_id.toString() };
     vi.spyOn(createPostUseCaseMock, "execute").mockResolvedValue({
       post: createdPost,
     });
@@ -41,16 +44,50 @@ describe("Create Post Controller", () => {
 
     expect(reply.status).toHaveBeenCalledWith(201);
     expect(reply.send).toHaveBeenCalledWith({ post: createdPost });
-    expect(createPostUseCaseMock.execute).toHaveBeenCalledWith(postData);
+    expect(createPostUseCaseMock.execute).toHaveBeenCalledWith({
+      ...postData,
+      professor_id,
+    });
+  });
+
+  it("should return 401 if user is not authenticated", async () => {
+    request.body = {
+      titulo: "New Post Title",
+      conteudo: "New Post Content",
+    };
+    request.user = undefined;
+
+    await create(request, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.send).toHaveBeenCalledWith({
+      message: "User not authenticated or invalid professor ID",
+    });
+    expect(createPostUseCaseMock.execute).not.toHaveBeenCalled();
+  });
+
+  it("should return 401 if professor_id is invalid", async () => {
+    request.body = {
+      titulo: "New Post Title",
+      conteudo: "New Post Content",
+    };
+    request.user = { professor_id: "invalid" };
+
+    await create(request, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.send).toHaveBeenCalledWith({
+      message: "User not authenticated or invalid professor ID",
+    });
+    expect(createPostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
   it("should return 400 if validation fails (missing title)", async () => {
     request.body = {
       resumo: "New Post Summary",
       conteudo: "New Post Content",
-      professor_id: 1,
     };
-    const executeSpy = vi.spyOn(createPostUseCaseMock, "execute");
+    request.user = { professor_id: "1" };
 
     await create(request, reply);
 
@@ -69,14 +106,12 @@ describe("Create Post Controller", () => {
     expect(createPostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
-  it("should return 400 if validation fails (invalid professor_id)", async () => {
+  it("should return 400 if validation fails (missing content)", async () => {
     request.body = {
       titulo: "New Post Title",
       resumo: "New Post Summary",
-      conteudo: "New Post Content",
-      professor_id: "invalid",
     };
-    const executeSpy = vi.spyOn(createPostUseCaseMock, "execute");
+    request.user = { professor_id: "1" };
 
     await create(request, reply);
 
@@ -86,7 +121,7 @@ describe("Create Post Controller", () => {
         message: "Validation error.",
         issues: expect.arrayContaining([
           expect.objectContaining({
-            path: ["professor_id"],
+            path: ["conteudo"],
             message: expect.any(String),
           }),
         ]),
@@ -100,8 +135,8 @@ describe("Create Post Controller", () => {
     request.body = {
       titulo: "New Post Title",
       conteudo: "New Post Content",
-      professor_id: 1,
     };
+    request.user = { professor_id: "1" };
     vi.spyOn(createPostUseCaseMock, "execute").mockRejectedValue(error);
 
     await expect(create(request, reply)).rejects.toThrow(error);

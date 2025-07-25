@@ -1,23 +1,20 @@
 import { db } from "@/lib/db";
+import { fakeAuth } from "__tests__/utils/fake-auth";
 import Fastify from "fastify";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { postRoutes } from "../../src/http/controller/post/routes";
-import { fakeAuth } from "__tests__/utils/fake-auth";
 
 const fastify = Fastify();
 
-async function createPost(
-  professorId: string,
-  data: {
-    titulo: string;
-    resumo?: string;
-    conteudo: string;
-  }
-) {
+async function createPost(data: {
+  titulo: string;
+  resumo?: string;
+  conteudo: string;
+}) {
   const res = await fastify.inject({
     method: "POST",
     url: "/posts",
-    payload: { ...data, professor_id: professorId },
+    payload: data,
   });
   return JSON.parse(res.payload).post;
 }
@@ -33,7 +30,7 @@ describe("Integration - PUT /posts/:id (update)", () => {
     const { rows } = await db.query("SELECT id FROM professor LIMIT 1");
     const professorId = rows[0].id;
 
-    const post = await createPost(professorId, {
+    const post = await createPost({
       titulo: "Título original",
       conteudo: "Conteúdo original",
     });
@@ -103,6 +100,7 @@ describe("Integration - PUT /posts/:id (update)", () => {
 
     expect(response.statusCode).toBe(400);
     const body = JSON.parse(response.payload);
-    expect(body).toHaveProperty("message", "No fields provided for update.");
+    expect(body).toHaveProperty("message");
+    expect(body.message).toContain("must NOT have fewer than 1 properties");
   });
 });

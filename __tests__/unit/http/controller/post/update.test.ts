@@ -26,7 +26,6 @@ describe("Update Post Controller", () => {
     reply = mockReply();
     updatePostUseCaseMock = new UpdatePostUseCase(mockPostRepository);
 
-
     vi.spyOn(updatePostUseCaseMock, "execute");
 
     vi.mocked(makeUpdatePostUseCase).mockReturnValue(updatePostUseCaseMock);
@@ -57,19 +56,6 @@ describe("Update Post Controller", () => {
       postId,
       ...updateData,
     });
-  });
-
-  it("should return 400 if no fields are provided for update", async () => {
-    request.params = { id: postId };
-    request.body = {};
-
-    await update(request, reply);
-
-    expect(reply.status).toHaveBeenCalledWith(400);
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "No fields provided for update.",
-    });
-    expect(updatePostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
   it("should return 404 if post not found", async () => {

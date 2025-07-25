@@ -6,13 +6,22 @@ const createPostBodySchema = z.object({
   titulo: z.string().min(1, "Title is required."),
   resumo: z.string().optional(),
   conteudo: z.string().min(1, "Content is required."),
-  professor_id: z.number().int().positive(),
 });
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { titulo, resumo, conteudo, professor_id } =
-      createPostBodySchema.parse(request.body);
+    const { titulo, resumo, conteudo } = createPostBodySchema.parse(
+      request.body
+    );
+
+    const professor_id = parseInt(request.user?.professor_id || "0");
+
+    if (!professor_id) {
+      return reply
+        .status(401)
+        .send({ message: "User not authenticated or invalid professor ID" });
+    }
+
     const createPostUseCase = makeCreatePostUseCase();
     const { post } = await createPostUseCase.execute({
       titulo,
@@ -42,9 +51,8 @@ export const createPostSchema = {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
       conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "number", minimum: 1 },
     },
-    required: ["titulo", "conteudo", "professor_id"],
+    required: ["titulo", "conteudo"],
   },
   response: {
     201: {
@@ -83,6 +91,15 @@ export const createPostSchema = {
         issues: {
           type: "object",
           description: "Details about validation errors",
+        },
+      },
+    },
+    401: {
+      type: "object",
+      properties: {
+        message: {
+          type: "string",
+          example: "User not authenticated or invalid professor ID",
         },
       },
     },

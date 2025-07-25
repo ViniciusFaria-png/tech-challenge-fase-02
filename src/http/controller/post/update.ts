@@ -21,13 +21,6 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
   try {
     const { id } = updatePostParamsSchema.parse(request.params);
     const data = updatePostBodySchema.parse(request.body);
-
-    if (Object.keys(data).length === 0) {
-      return reply
-        .status(400)
-        .send({ message: "No fields provided for update." });
-    }
-
     const updatePostUseCase = makeUpdatePostUseCase();
     const { post } = await updatePostUseCase.execute({
       postId: id,
@@ -67,7 +60,7 @@ export const updatePostSchema = {
       conteudo: { type: "string", minLength: 1 },
       professor_id: { type: "number", minimum: 1 },
     },
-    minProperties: 1, // At least one property is required for update
+    minProperties: 1,
   },
   response: {
     200: {

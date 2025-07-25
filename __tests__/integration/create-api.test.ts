@@ -41,7 +41,7 @@ describe("Integration - POST /posts (create)", () => {
         titulo: payload.titulo,
         resumo: payload.resumo,
         conteudo: payload.conteudo,
-        professor_id: expect.any(String),
+        professor_id: expect.any(Number),
         created_at: expect.any(String),
         updated_at: expect.any(String),
       })
@@ -60,7 +60,43 @@ describe("Integration - POST /posts (create)", () => {
 
     expect(response.statusCode).toBe(400);
     const body = JSON.parse(response.payload);
-    expect(body).toHaveProperty("message", "Validation error.");
-    expect(body).toHaveProperty("issues");
+    expect(body).toHaveProperty(
+      "message",
+      "body/titulo must NOT have fewer than 1 characters"
+    );
+  });
+
+  test("should return 400 when titulo is missing", async () => {
+    const response = await fastify.inject({
+      method: "POST",
+      url: "/posts",
+      payload: {
+        conteudo: "conteudo",
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    const body = JSON.parse(response.payload);
+    expect(body).toHaveProperty(
+      "message",
+      "body must have required property 'titulo'"
+    );
+  });
+
+  test("should return 400 when conteudo is missing", async () => {
+    const response = await fastify.inject({
+      method: "POST",
+      url: "/posts",
+      payload: {
+        titulo: "Título do post",
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    const body = JSON.parse(response.payload);
+    expect(body).toHaveProperty(
+      "message",
+      "body must have required property 'conteudo'"
+    );
   });
 });
