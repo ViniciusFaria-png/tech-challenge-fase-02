@@ -56,6 +56,8 @@ describe("Delete Post Controller", () => {
   it("should return 400 if validation fails (invalid post ID format)", async () => {
     request.params = { id: "invalid-uuid" };
 
+    const executeSpy = vi.spyOn(deletePostUseCaseMock, "execute"); // <— torne-o um spy
+
     await remove(request, reply);
 
     expect(reply.status).toHaveBeenCalledWith(400);
@@ -70,7 +72,8 @@ describe("Delete Post Controller", () => {
         ]),
       })
     );
-    expect(deletePostUseCaseMock.execute).not.toHaveBeenCalled();
+
+    expect(executeSpy).not.toHaveBeenCalled(); // <— agora funciona
   });
 
   it("should throw error if use case throws unexpected error", async () => {

@@ -49,7 +49,8 @@ describe("Create Post Controller", () => {
       resumo: "New Post Summary",
       conteudo: "New Post Content",
       professor_id: 1,
-    }; 
+    };
+    const executeSpy = vi.spyOn(createPostUseCaseMock, "execute");
 
     await create(request, reply);
 
@@ -73,8 +74,9 @@ describe("Create Post Controller", () => {
       titulo: "New Post Title",
       resumo: "New Post Summary",
       conteudo: "New Post Content",
-      professor_id: "invalid", 
+      professor_id: "invalid",
     };
+    const executeSpy = vi.spyOn(createPostUseCaseMock, "execute");
 
     await create(request, reply);
 
