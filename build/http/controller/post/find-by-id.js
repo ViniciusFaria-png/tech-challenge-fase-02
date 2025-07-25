@@ -52,9 +52,6 @@ var ResourceNotFoundError = class extends Error {
   }
 };
 
-// src/lib/db.ts
-var import_pg = require("pg");
-
 // src/env/index.ts
 var import_config = require("dotenv/config");
 var import_zod = require("zod");
@@ -75,6 +72,7 @@ if (!_env.success) {
 var env = _env.data;
 
 // src/lib/db.ts
+var import_pg = require("pg");
 var CONFIG = {
   user: env.POSTGRES_USER,
   host: env.POSTGRES_HOST,
@@ -101,6 +99,17 @@ var Database = class {
   }
   get clientInstance() {
     return this.client;
+  }
+  query(text, params) {
+    return __async(this, null, function* () {
+      if (!this.client) {
+        yield this.connection();
+      }
+      if (!this.client) {
+        throw new Error("Cliente do banco n\xE3o est\xE1 conectado.");
+      }
+      return this.client.query(text, params);
+    });
   }
 };
 var db = new Database();
@@ -223,23 +232,27 @@ var findPostParamsSchema = import_zod2.z.object({
 });
 function findById(request, reply) {
   return __async(this, null, function* () {
-    const { id } = findPostParamsSchema.parse(request.params);
     try {
+      const { id } = findPostParamsSchema.parse(request.params);
       const findPostByIdUseCase = makeFindPostByIdUseCase();
-      const { post } = yield findPostByIdUseCase.execute({
-        postId: id
-      });
+      const { post } = yield findPostByIdUseCase.execute({ postId: id });
       return reply.status(200).send({ post });
     } catch (err) {
       if (err instanceof ResourceNotFoundError) {
         return reply.status(404).send({ message: err.message });
+      }
+      if (err instanceof import_zod2.z.ZodError) {
+        return reply.status(400).send({
+          message: "Validation error.",
+          issues: err.issues
+        });
       }
       throw err;
     }
   });
 }
 var findByIdPostSchema = {
-  summary: "Retrieve a post by its ID",
+  summary: "Get a post by ID",
   tags: ["Posts"],
   params: {
     type: "object",
@@ -255,11 +268,15 @@ var findByIdPostSchema = {
         post: {
           type: "object",
           properties: {
-            id: { type: "string", format: "uuid" },
+            id: {
+              type: "string",
+              format: "uuid",
+              description: "Generated UUID for the post"
+            },
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" }
           },
@@ -274,17 +291,30 @@ var findByIdPostSchema = {
         }
       }
     },
-    404: {
-      type: "object",
-      properties: {
-        message: { type: "string", example: "Resource not found." }
-      }
-    },
     400: {
       type: "object",
       properties: {
-        message: { type: "string" },
-        issues: { type: "object" }
+        message: { type: "string", example: "Validation error." },
+        issues: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              code: { type: "string" },
+              expected: { type: "string" },
+              received: { type: "string" },
+              path: { type: "array", items: { type: "string" } },
+              message: { type: "string" }
+            },
+            required: ["code", "expected", "received", "path", "message"]
+          }
+        }
+      }
+    },
+    404: {
+      type: "object",
+      properties: {
+        message: { type: "string", example: "Resource not found" }
       }
     }
   }
