@@ -73,7 +73,7 @@ describe("Delete Post Controller", () => {
       })
     );
 
-    expect(executeSpy).not.toHaveBeenCalled(); // <— agora funciona
+    expect(executeSpy).not.toHaveBeenCalled();
   });
 
   it("should throw error if use case throws unexpected error", async () => {

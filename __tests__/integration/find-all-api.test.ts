@@ -6,18 +6,15 @@ import { postRoutes } from "../../src/http/controller/post/routes";
 
 const fastify = Fastify();
 
-async function createPost(
-  professorId: string,
-  data: {
-    titulo: string;
-    resumo?: string;
-    conteudo: string;
-  }
-) {
+async function createPost(data: {
+  titulo: string;
+  resumo?: string;
+  conteudo: string;
+}) {
   const res = await fastify.inject({
     method: "POST",
     url: "/posts",
-    payload: { ...data, professor_id: professorId },
+    payload: data,
   });
   return JSON.parse(res.payload).post;
 }
@@ -33,11 +30,11 @@ describe("Integration - GET /posts (find all)", () => {
     const { rows } = await db.query("SELECT id FROM professor LIMIT 1");
     professorId = rows[0].id;
 
-    await createPost(professorId, {
+    await createPost({
       titulo: "Um post",
       conteudo: "A",
     });
-    await createPost(professorId, {
+    await createPost({
       titulo: "Outro post",
       conteudo: "B",
     });
