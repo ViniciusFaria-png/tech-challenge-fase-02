@@ -31,7 +31,7 @@ var envSchema = import_zod.z.object({
   POSTGRES_DB: import_zod.z.string(),
   POSTGRES_USER: import_zod.z.string(),
   POSTGRES_PASSWORD: import_zod.z.string(),
-  POSTEGRES_HOST: import_zod.z.string().default("0.0.0.0"),
+  POSTGRES_HOST: import_zod.z.string().default("db"),
   POSTGRES_PORT: import_zod.z.coerce.number()
 });
 var _env = envSchema.safeParse(process.env);

@@ -37,12 +37,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/use-cases/factory/make-create-post-use-case.ts
-var make_create_post_use_case_exports = {};
-__export(make_create_post_use_case_exports, {
-  makeCreatePostUseCase: () => makeCreatePostUseCase
+// src/use-cases/factory/make-find-post-by-id-use-case.ts
+var make_find_post_by_id_use_case_exports = {};
+__export(make_find_post_by_id_use_case_exports, {
+  makeFindPostByIdUseCase: () => makeFindPostByIdUseCase
 });
-module.exports = __toCommonJS(make_create_post_use_case_exports);
+module.exports = __toCommonJS(make_find_post_by_id_use_case_exports);
 
 // src/lib/db.ts
 var import_pg = require("pg");
@@ -181,26 +181,25 @@ var PostRepository = class {
   }
 };
 
-// src/use-cases/create-post.ts
-var CreatePostUseCase = class {
+// src/use-cases/errors/resource-not-found-error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource not found");
+  }
+};
+
+// src/use-cases/find-post-by-id.ts
+var FindPostByIdUseCase = class {
   constructor(postRepository) {
     this.postRepository = postRepository;
   }
   execute(_0) {
     return __async(this, arguments, function* ({
-      titulo,
-      resumo,
-      conteudo,
-      professor_id
+      postId
     }) {
-      const post = yield this.postRepository.create({
-        titulo,
-        resumo,
-        conteudo,
-        professor_id
-      });
+      const post = yield this.postRepository.findById(postId);
       if (!post) {
-        throw new Error("Failed to create post.");
+        throw new ResourceNotFoundError();
       }
       return {
         post
@@ -209,13 +208,13 @@ var CreatePostUseCase = class {
   }
 };
 
-// src/use-cases/factory/make-create-post-use-case.ts
-function makeCreatePostUseCase() {
+// src/use-cases/factory/make-find-post-by-id-use-case.ts
+function makeFindPostByIdUseCase() {
   const postRepository = new PostRepository();
-  const useCase = new CreatePostUseCase(postRepository);
+  const useCase = new FindPostByIdUseCase(postRepository);
   return useCase;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  makeCreatePostUseCase
+  makeFindPostByIdUseCase
 });

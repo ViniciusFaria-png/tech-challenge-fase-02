@@ -2,7 +2,21 @@
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -37,12 +51,12 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/use-cases/factory/make-create-post-use-case.ts
-var make_create_post_use_case_exports = {};
-__export(make_create_post_use_case_exports, {
-  makeCreatePostUseCase: () => makeCreatePostUseCase
+// src/use-cases/factory/make-update-post-use-case.ts
+var make_update_post_use_case_exports = {};
+__export(make_update_post_use_case_exports, {
+  makeUpdatePostUseCase: () => makeUpdatePostUseCase
 });
-module.exports = __toCommonJS(make_create_post_use_case_exports);
+module.exports = __toCommonJS(make_update_post_use_case_exports);
 
 // src/lib/db.ts
 var import_pg = require("pg");
@@ -181,26 +195,28 @@ var PostRepository = class {
   }
 };
 
-// src/use-cases/create-post.ts
-var CreatePostUseCase = class {
+// src/use-cases/errors/resource-not-found-error.ts
+var ResourceNotFoundError = class extends Error {
+  constructor() {
+    super("Resource not found");
+  }
+};
+
+// src/use-cases/update-post.ts
+var UpdatePostUseCase = class {
   constructor(postRepository) {
     this.postRepository = postRepository;
   }
-  execute(_0) {
-    return __async(this, arguments, function* ({
-      titulo,
-      resumo,
-      conteudo,
-      professor_id
-    }) {
-      const post = yield this.postRepository.create({
-        titulo,
-        resumo,
-        conteudo,
-        professor_id
-      });
+  execute(_a) {
+    return __async(this, null, function* () {
+      var _b = _a, {
+        postId
+      } = _b, data = __objRest(_b, [
+        "postId"
+      ]);
+      const post = yield this.postRepository.update(postId, data);
       if (!post) {
-        throw new Error("Failed to create post.");
+        throw new ResourceNotFoundError();
       }
       return {
         post
@@ -209,13 +225,13 @@ var CreatePostUseCase = class {
   }
 };
 
-// src/use-cases/factory/make-create-post-use-case.ts
-function makeCreatePostUseCase() {
+// src/use-cases/factory/make-update-post-use-case.ts
+function makeUpdatePostUseCase() {
   const postRepository = new PostRepository();
-  const useCase = new CreatePostUseCase(postRepository);
+  const useCase = new UpdatePostUseCase(postRepository);
   return useCase;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  makeCreatePostUseCase
+  makeUpdatePostUseCase
 });
