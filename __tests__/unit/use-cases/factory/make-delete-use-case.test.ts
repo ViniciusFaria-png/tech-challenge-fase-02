@@ -1,5 +1,5 @@
-import { DeletePostUseCase } from "@/use-cases/delete-post";
-import { makeDeletePostUseCase } from "@/use-cases/factory/make-delete-post-use-case";
+import { DeletePostUseCase } from "@/use-cases/factory/post/delete-post";
+import { makeDeletePostUseCase } from "@/use-cases/factory/post/make-delete-post-use-case";
 import { describe, expect, test } from "vitest";
 
 describe("makeDeletePostUseCase", () => {

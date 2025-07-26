@@ -1,33 +1,20 @@
-// src/http/controller/post/update.ts
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeUpdatePostUseCase } from "@/use-cases/factory/post/make-update-post-use-case";
+import { makeFindUserByIdUseCase } from "@/use-cases/factory/user/make-find-user-by-id-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { z } from "zod";
+import {  z } from "zod";
 
-const updatePostParamsSchema = z.object({
-  id: z.string().uuid("Invalid post ID format."),
+const findUserParamsSchema = z.object({
+  id: z.uuid("Invalid user ID format."),
 });
 
-const updatePostBodySchema = z
-  .object({
-    titulo: z.string().min(1, "Title cannot be empty.").optional(),
-    resumo: z.string().optional(),
-    conteudo: z.string().min(1, "Content cannot be empty.").optional(),
-    professor_id: z.number().int().positive().optional(),
-  })
-  .partial();
-
-export async function update(request: FastifyRequest, reply: FastifyReply) {
+export async function findByIdUser(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { id } = updatePostParamsSchema.parse(request.params);
-    const data = updatePostBodySchema.parse(request.body);
-    const updatePostUseCase = makeUpdatePostUseCase();
-    const { post } = await updatePostUseCase.execute({
-      postId: id,
-      ...data,
-    });
+    const { id } = findUserParamsSchema.parse(request.params);
 
-    return reply.status(200).send({ post });
+    const findUserByIdUseCase = makeFindUserByIdUseCase();
+    const { user } = await findUserByIdUseCase.execute({ userId: id });
+
+    return reply.status(200).send({ user });
   } catch (err) {
     if (err instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: err.message });
@@ -42,9 +29,9 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export const updatePostSchema = {
-  summary: "Update a post by ID",
-  tags: ["Posts"],
+export const findByIdUserSchema = {
+  summary: "Get a user by ID",
+  tags: ["Users"],
   params: {
     type: "object",
     properties: {
@@ -52,40 +39,27 @@ export const updatePostSchema = {
     },
     required: ["id"],
   },
-  body: {
-    type: "object",
-    properties: {
-      titulo: { type: "string", minLength: 1 },
-      resumo: { type: "string" },
-      conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "number", minimum: 1 },
-    },
-    minProperties: 1,
-  },
   response: {
     200: {
       type: "object",
       properties: {
-        post: {
+        user: {
           type: "object",
           properties: {
             id: {
               type: "string",
               format: "uuid",
-              description: "Generated UUID for the post",
+              description: "Generated UUID for the user",
             },
-            titulo: { type: "string" },
-            resumo: { type: "string", nullable: true },
-            conteudo: { type: "string" },
-            professor_id: { type: "number", format: "int32" },
+            email: { type: "string" },
+            senha: { type: "string"},
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
           required: [
             "id",
-            "titulo",
-            "conteudo",
-            "professor_id",
+            "email",
+            "senha",
             "created_at",
             "updated_at",
           ],

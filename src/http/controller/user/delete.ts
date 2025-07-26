@@ -1,18 +1,19 @@
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeDeletePostUseCase } from "@/use-cases/factory/post/make-delete-post-use-case";
+import { makeDeleteUserUseCase } from "@/use-cases/factory/user/make-delete-user-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
+
 import { z } from "zod";
 
-const deletePostParamsSchema = z.object({
-  id: z.string().uuid("Invalid post ID format."),
+const deleteUserParamsSchema = z.object({
+  id: z.uuid("Invalid user ID format."),
 });
 
-export async function remove(request: FastifyRequest, reply: FastifyReply) {
+export async function removeUser(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { id } = deletePostParamsSchema.parse(request.params);
+    const { id } = deleteUserParamsSchema.parse(request.params);
 
-    const deletePostUseCase = makeDeletePostUseCase();
-    await deletePostUseCase.execute({ postId: id });
+    const deleteUserUseCase = makeDeleteUserUseCase();
+    await deleteUserUseCase.execute({ userId: id });
 
     return reply.status(204).send();
   } catch (err) {
@@ -29,9 +30,9 @@ export async function remove(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export const deletePostSchema = {
-  summary: "Delete a post by ID",
-  tags: ["Posts"],
+export const deleteUserSchema = {
+  summary: "Delete a user by ID",
+  tags: ["Users"],
   params: {
     type: "object",
     properties: {

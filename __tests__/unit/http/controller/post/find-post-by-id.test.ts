@@ -1,7 +1,7 @@
 import { findById } from "@/http/controller/post/find-by-id";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeFindPostByIdUseCase } from "@/use-cases/factory/make-find-post-by-id-use-case";
-import { FindPostByIdUseCase } from "@/use-cases/find-post-by-id";
+import { makeFindPostByIdUseCase } from "@/use-cases/factory/post/make-find-post-by-id-use-case";
+import { FindPostByIdUseCase } from "@/use-cases/factory/post/find-post-by-id";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../../../setup/mocks/repository-mocks";

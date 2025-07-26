@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { makeSearchPostUseCase } from '@/use-cases/factory/make-search-post-use-case';
-import { SearchQueryStringUseCase } from '@/use-cases/search-post';
+import { makeSearchPostUseCase } from '@/use-cases/factory/post/make-search-post-use-case';
+import { SearchQueryStringUseCase } from '@/use-cases/factory/post/search-post';
 
 describe('makeSearchPostUseCase', () => {
   test('should create SearchQueryStringUseCase instance', () => {

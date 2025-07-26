@@ -1,4 +1,4 @@
-import { makeCreatePostUseCase } from "@/use-cases/factory/make-create-post-use-case";
+import { makeCreatePostUseCase } from "@/use-cases/factory/post/make-create-post-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 

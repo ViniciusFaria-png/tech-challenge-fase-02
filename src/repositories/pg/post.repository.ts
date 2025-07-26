@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { IPostRepository } from "../post.repository.interface";
 
 export class PostRepository implements IPostRepository {
+ 
   async create(
     data: Omit<IPost, "id" | "created_at" | "updated_at">
   ): Promise<IPost | undefined> {
@@ -14,12 +15,14 @@ export class PostRepository implements IPostRepository {
     );
     return result?.rows[0];
   }
+
   async findAll(): Promise<IPost[]> {
     const result = await db.clientInstance?.query<IPost>(
       `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post`
     );
     return result?.rows || [];
   }
+
   async findById(id: string): Promise<IPost | undefined> {
     const result = await db.clientInstance?.query<IPost>(
       `SELECT id, titulo, resumo, conteudo, professor_id, created_at, updated_at FROM post WHERE id = $1`,
@@ -27,6 +30,7 @@ export class PostRepository implements IPostRepository {
     );
     return result?.rows[0];
   }
+
   async update(
     id: string,
     data: Partial<Omit<IPost, "id" | "created_at" | "updated_at">>
@@ -70,6 +74,7 @@ export class PostRepository implements IPostRepository {
   async delete(id: string): Promise<void> {
     await db.clientInstance?.query(`DELETE FROM post WHERE id = $1`, [id]);
   }
+
   public async searchQueryString(query: string): Promise<IPost[]> {
     const result = await db.clientInstance?.query<IPost>(
       `SELECT * FROM post WHERE titulo ILIKE $1 OR conteudo ILIKE $1`,

@@ -1,5 +1,5 @@
 import { PostRepository } from "@/repositories/pg/post.repository";
-import { CreatePostUseCase } from "../create-post";
+import { CreatePostUseCase } from "./create-post";
 
 export function makeCreatePostUseCase() {
   const postRepository = new PostRepository();

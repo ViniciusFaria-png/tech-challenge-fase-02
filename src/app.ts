@@ -2,7 +2,7 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
 import { env } from "./env";
-import { postRoutes } from "./http/controller/post/routes";
+import { postRoutes } from "./http/controller/routes";
 import { globalErrorHandler } from "./utils/global-error-handler";
 
 export const app = fastify({

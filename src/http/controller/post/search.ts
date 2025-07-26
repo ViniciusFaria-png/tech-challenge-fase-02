@@ -1,5 +1,5 @@
 import { PostRepository } from "@/repositories/pg/post.repository";
-import { SearchQueryStringUseCase } from "@/use-cases/search-post";
+import { SearchQueryStringUseCase } from "@/use-cases/factory/post/search-post";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 

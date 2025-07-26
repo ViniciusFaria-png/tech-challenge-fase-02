@@ -1,4 +1,4 @@
-import { makeFindAllPostsUseCase } from "@/use-cases/factory/make-find-all-posts-use-case";
+import { makeFindAllPostsUseCase } from "@/use-cases/factory/post/make-find-all-posts-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 
 export async function findAll(request: FastifyRequest, reply: FastifyReply) {

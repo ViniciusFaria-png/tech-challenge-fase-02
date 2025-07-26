@@ -1,6 +1,6 @@
 import { create } from "@/http/controller/post/create";
-import { CreatePostUseCase } from "@/use-cases/create-post";
-import { makeCreatePostUseCase } from "@/use-cases/factory/make-create-post-use-case";
+import { CreatePostUseCase } from "@/use-cases/factory/post/create-post";
+import { makeCreatePostUseCase } from "@/use-cases/factory/post/make-create-post-use-case";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../../../setup/mocks/repository-mocks";

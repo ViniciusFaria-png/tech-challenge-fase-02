@@ -1,5 +1,5 @@
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeFindPostByIdUseCase } from "@/use-cases/factory/make-find-post-by-id-use-case";
+import { makeFindPostByIdUseCase } from "@/use-cases/factory/post/make-find-post-by-id-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 
