@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { makeCreatePostUseCase } from "@/use-cases/factory/make-create-post-use-case";
-import { CreatePostUseCase } from "@/use-cases/factory/create-post";
+import { CreatePostUseCase } from "@/use-cases/create-post";
 
 describe("makeCreatePostUseCase", () => {
   test("should create a CreatePostUseCase instance", () => {

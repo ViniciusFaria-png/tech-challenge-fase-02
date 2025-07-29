@@ -5,7 +5,7 @@ import { z } from "zod";
 const createPostBodySchema = z.object({
   titulo: z.string().min(1, "Title is required."),
   resumo: z.string().optional(),
-  conteudo: z.string().min(1, "Content is required."),
+  conteudo: z.string().min(1, "Content is required.")
 });
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
@@ -14,7 +14,7 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
       request.body
     );
 
-    const professor_id = parseInt(request.user?.professor_id || "0");
+    const professor_id ="" //parseInt(request.user?.professor_id || "0");
 
     if (!professor_id) {
       return reply

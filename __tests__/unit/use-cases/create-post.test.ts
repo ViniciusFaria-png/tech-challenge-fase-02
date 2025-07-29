@@ -1,4 +1,4 @@
-import { CreatePostUseCase } from "@/use-cases/factory/create-post";
+import { CreatePostUseCase } from "@/use-cases/create-post";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockCreatePostData, mockPost } from "../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../setup/mocks/repository-mocks";

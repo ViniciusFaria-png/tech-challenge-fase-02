@@ -1,4 +1,4 @@
-import { DeletePostUseCase } from "@/use-cases/factory/delete-post";
+import { DeletePostUseCase } from "@/use-cases/delete-post";
 import { makeDeletePostUseCase } from "@/use-cases/factory/make-delete-post-use-case";
 import { describe, expect, test } from "vitest";
 

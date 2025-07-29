@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { makeFindAllPostsUseCase } from '@/use-cases/factory/make-find-all-posts-use-case';
-import { FindAllPostsUseCase } from '@/use-cases/factory/find-all-posts';
+import { FindAllPostsUseCase } from '@/use-cases/find-all-posts';
 
 describe('makeFindAllPostsUseCase', () => {
   test('should create FindAllPostsUseCase instance', () => {

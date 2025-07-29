@@ -1,7 +1,6 @@
 import { IPost } from "@/entities/models/post.interface";
 import { db } from "@/lib/db";
 import { IPostRepository } from "../post.repository.interface";
-
 export class PostRepository implements IPostRepository {
  
   async create(
@@ -83,4 +82,6 @@ export class PostRepository implements IPostRepository {
 
     return result?.rows || [];
   }
+
+
 }
