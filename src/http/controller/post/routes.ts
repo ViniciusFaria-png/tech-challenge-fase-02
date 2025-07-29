@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { findAll, findAllPostsSchema } from "./post/find-all";
-import { search } from "./post/search";
-import { findById, findByIdPostSchema } from "./post/find-by-id";
-import { create, createPostSchema } from "./post/create";
-import { update, updatePostSchema } from "./post/update";
-import { deletePostSchema, remove } from "./post/delete";
-import { validateJWT } from "../middlewares/jwt-validate";
+import { findAll, findAllPostsSchema } from "./find-all";
+import { search } from "./search";
+import { findById, findByIdPostSchema } from "./find-by-id";
+import { create, createPostSchema } from "./create";
+import { update, updatePostSchema } from "./update";
+import { deletePostSchema, remove } from "./delete";
+import { validateJWT } from "../../middlewares/jwt-validate";
 
 export async function postRoutes(app: FastifyInstance) {
  
