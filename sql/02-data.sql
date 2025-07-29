@@ -1,21 +1,21 @@
-INSERT INTO "user" (email, senha) VALUES ('quimica@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('ingles@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('portugues@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('geografia@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('historia@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('fisica@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('matematica@fiap.com', '123456');
-INSERT INTO "user" (email, senha) VALUES ('biologia@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('quimica@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('ingles@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('portugues@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('geografia@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('historia@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('fisica@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('matematica@fiap.com', '123456');
+INSERT INTO "users" (email, senha) VALUES ('biologia@fiap.com', '123456');
 
 INSERT INTO professor (nome, materia, user_id) VALUES 
-('Elvis Presley', 'quimica', (SELECT id FROM "user" WHERE email = 'quimica@fiap.com')),
-('Bon Scott', 'ingles', (SELECT id FROM "user" WHERE email = 'ingles@fiap.com')),
-('Jimmy Page', 'portugues', (SELECT id FROM "user" WHERE email = 'portugues@fiap.com')),
-('Lemmy Kilmister', 'geografia', (SELECT id FROM "user" WHERE email = 'geografia@fiap.com')),
-('Tony Iomi', 'historia', (SELECT id FROM "user" WHERE email = 'historia@fiap.com')),
-('Bruce Dickinson', 'fisica', (SELECT id FROM "user" WHERE email = 'fisica@fiap.com')),
-('Ozzy Osbourne', 'matematica', (SELECT id FROM "user" WHERE email = 'matematica@fiap.com')),
-('Axl Rose', 'biologia', (SELECT id FROM "user" WHERE email = 'biologia@fiap.com'));
+('Elvis Presley', 'quimica', (SELECT id FROM "users" WHERE email = 'quimica@fiap.com')),
+('Bon Scott', 'ingles', (SELECT id FROM "users" WHERE email = 'ingles@fiap.com')),
+('Jimmy Page', 'portugues', (SELECT id FROM "users" WHERE email = 'portugues@fiap.com')),
+('Lemmy Kilmister', 'geografia', (SELECT id FROM "users" WHERE email = 'geografia@fiap.com')),
+('Tony Iomi', 'historia', (SELECT id FROM "users" WHERE email = 'historia@fiap.com')),
+('Bruce Dickinson', 'fisica', (SELECT id FROM "users" WHERE email = 'fisica@fiap.com')),
+('Ozzy Osbourne', 'matematica', (SELECT id FROM "users" WHERE email = 'matematica@fiap.com')),
+('Axl Rose', 'biologia', (SELECT id FROM "users" WHERE email = 'biologia@fiap.com'));
 
 INSERT INTO post (titulo, resumo, conteudo, professor_id) 
 VALUES ('Ligações Químicas: O Poder da Atração Molecular', 

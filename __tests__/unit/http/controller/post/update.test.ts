@@ -1,7 +1,7 @@
 import { update } from "@/http/controller/post/update";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
 import { makeUpdatePostUseCase } from "@/use-cases/factory/make-update-post-use-case";
-import { UpdatePostUseCase } from "@/use-cases/update-post";
+import { UpdatePostUseCase } from "@/use-cases/factory/update-post";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../../../setup/mocks/repository-mocks";

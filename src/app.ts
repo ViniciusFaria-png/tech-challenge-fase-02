@@ -2,12 +2,20 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
 import { env } from "./env";
-import { postRoutes } from "./http/controller/post/routes";
+import { postRoutes } from "./http/controller/routes";
 import { globalErrorHandler } from "./utils/global-error-handler";
+import fastifyJwt from "@fastify/jwt";
 
 export const app = fastify({
   logger: true,
 });
+
+app.register(fastifyJwt,{
+  secret: env.JWT_SECRET,
+  sign: {
+    expiresIn: "1h",
+  },
+})
 
 app.register(fastifySwagger, {
   openapi: {

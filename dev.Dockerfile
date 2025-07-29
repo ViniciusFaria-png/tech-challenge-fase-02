@@ -2,6 +2,7 @@ FROM node:lts
 
 WORKDIR /usr/src
 
+COPY .env .env
 
 COPY package*.json ./
 RUN npm install

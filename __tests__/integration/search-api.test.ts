@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import Fastify from "fastify";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { postRoutes } from "../../src/http/controller/post/routes";
+import { postRoutes } from "../../src/http/controller/routes";
 
 const fastify = Fastify();
 
