@@ -10,7 +10,7 @@ import { signin, registerBodySchema } from "./user/signin";
 
 export async function postRoutes(app: FastifyInstance) {
  
-  app.get("/posts/search",{onRequest:[validateJWT]}, search);
+  app.get("/posts/search", search);
   
   app.get("/posts/:id", { schema: findByIdPostSchema }, findById);
 

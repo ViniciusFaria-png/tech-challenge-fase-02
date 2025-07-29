@@ -1,5 +1,4 @@
 import { makeSigninUseCase } from "@/use-cases/factory/make-signin-use-case";
-import { compare } from "bcryptjs";
 import { FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
 
@@ -10,21 +9,15 @@ export async function signin(request: FastifyRequest, reply: FastifyReply)
         
         const registerBodySchema = z.object({   
             email: z.string().email("Invalid email format."),
-            password: z.string().min(6, "Password must be at least 6 characters long."),
+            senha: z.string().min(6, "Password must be at least 6 characters long."),
         });
     
 
-        const {email, password} = registerBodySchema.parse(request.body);
+        const {email, senha} = registerBodySchema.parse(request.body);
         
         // Assuming you have a use case to handle the sign-in logic
         const signinUseCase = makeSigninUseCase();
-        const result = await signinUseCase.execute( email, password );
-        
-        const doesMathPassword = await compare(password, result.senha);
-        
-        if (!doesMathPassword) {
-            return reply.status(401).send({ message: "Invalid email or password." });
-        }
+        const result = await signinUseCase.execute( email, senha );
         
         const token = await reply.jwtSign({
             email: result.email,        
@@ -44,9 +37,9 @@ export const registerBodySchema ={
         type: "object",
         properties: {
             email: { type: "string", format: "email" },
-            password: { type: "string", minLength: 4 },
+            senha: { type: "string", minLength: 6 },
         },
-        required: ["email", "password"],
+        required: ["email", "senha"],
     },
     response: {
         200: {
