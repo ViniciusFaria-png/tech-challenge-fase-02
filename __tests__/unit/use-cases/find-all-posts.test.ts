@@ -1,4 +1,4 @@
-import { FindAllPostsUseCase } from "@/use-cases/factory/post/find-all-posts";
+import { FindAllPostsUseCase } from "@/use-cases/factory/find-all-posts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPostList } from "../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../setup/mocks/repository-mocks";

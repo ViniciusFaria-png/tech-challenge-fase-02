@@ -1,5 +1,5 @@
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeDeletePostUseCase } from "@/use-cases/factory/post/make-delete-post-use-case";
+import { makeDeletePostUseCase } from "@/use-cases/factory/make-delete-post-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 

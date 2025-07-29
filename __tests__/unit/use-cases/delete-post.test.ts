@@ -1,4 +1,4 @@
-import { DeletePostUseCase } from "@/use-cases/factory/post/delete-post";
+import { DeletePostUseCase } from "@/use-cases/factory/delete-post";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../setup/mocks/entity-mocks";

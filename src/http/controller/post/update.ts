@@ -1,6 +1,6 @@
 // src/http/controller/post/update.ts
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeUpdatePostUseCase } from "@/use-cases/factory/post/make-update-post-use-case";
+import { makeUpdatePostUseCase } from "@/use-cases/factory/make-update-post-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 

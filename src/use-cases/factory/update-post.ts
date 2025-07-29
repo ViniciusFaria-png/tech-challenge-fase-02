@@ -1,6 +1,6 @@
 import { IPost } from "@/entities/models/post.interface";
 import { IPostRepository } from "@/repositories/post.repository.interface";
-import { ResourceNotFoundError } from "../../errors/resource-not-found-error";
+import { ResourceNotFoundError } from "../errors/resource-not-found-error";
 
 interface UpdatePostUseCaseRequest {
   postId: string;

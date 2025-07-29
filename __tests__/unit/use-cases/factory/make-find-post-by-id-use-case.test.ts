@@ -1,5 +1,5 @@
-import { makeFindPostByIdUseCase } from "@/use-cases/factory/post/make-find-post-by-id-use-case";
-import { FindPostByIdUseCase } from "@/use-cases/factory/post/find-post-by-id";
+import { makeFindPostByIdUseCase } from "@/use-cases/factory/make-find-post-by-id-use-case";
+import { FindPostByIdUseCase } from "@/use-cases/factory/find-post-by-id";
 import { describe, expect, test } from "vitest";
 
 describe("makeFindPostByIdUseCase", () => {

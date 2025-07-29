@@ -1,4 +1,4 @@
-import { FindPostByIdUseCase } from "@/use-cases/factory/post/find-post-by-id";
+import { FindPostByIdUseCase } from "@/use-cases/factory/find-post-by-id";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../setup/mocks/entity-mocks";

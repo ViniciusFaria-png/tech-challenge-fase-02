@@ -1,7 +1,7 @@
 import { remove } from "@/http/controller/post/delete";
-import { DeletePostUseCase } from "@/use-cases/factory/post/delete-post";
+import { DeletePostUseCase } from "@/use-cases/factory/delete-post";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { makeDeletePostUseCase } from "@/use-cases/factory/post/make-delete-post-use-case";
+import { makeDeletePostUseCase } from "@/use-cases/factory/make-delete-post-use-case";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPostRepository } from "../../../../setup/mocks/repository-mocks";
 import {

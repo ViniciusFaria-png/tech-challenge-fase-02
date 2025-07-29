@@ -1,4 +1,4 @@
-import { SearchQueryStringUseCase } from "@/use-cases/factory/post/search-post";
+import { SearchQueryStringUseCase } from "@/use-cases/factory/search-post";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPostList } from "../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../setup/mocks/repository-mocks";
