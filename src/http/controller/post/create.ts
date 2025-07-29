@@ -14,7 +14,7 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
       request.body
     );
 
-    const professor_id ="" //parseInt(request.user?.professor_id || "0");
+    const professor_id = parseInt((request.user as any)?.professor_id || "0");
 
     if (!professor_id) {
       return reply
