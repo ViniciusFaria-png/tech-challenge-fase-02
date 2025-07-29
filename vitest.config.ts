@@ -1,7 +1,7 @@
-const path = require("path");
-const { defineConfig } = require("vitest/config");
+import path from "path";
+import { defineConfig } from "vitest/config";
 
-module.exports = defineConfig({
+export default defineConfig({
   test: {
     globals: true,
     environment: "node",
@@ -31,7 +31,7 @@ module.exports = defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(process.cwd(), "./src"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });
