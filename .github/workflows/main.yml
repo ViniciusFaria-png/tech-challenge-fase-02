@@ -57,8 +57,9 @@ jobs:
           done
 
       - name: Run Vitest
-        run: npx vitest run
+        run: npx vitest run --coverage
   build-and-publish:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
