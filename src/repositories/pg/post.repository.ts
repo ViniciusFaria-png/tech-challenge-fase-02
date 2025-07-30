@@ -55,13 +55,12 @@ export class PostRepository implements IPostRepository {
       values.push(data.professor_id);
     }
 
-    fields.push(`updated_at = NOW()`);
-
-    values.push(id);
-
     if (fields.length === 0) {
       return this.findById(id);
     }
+
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
 
     const setClause = fields.join(", ");
     const query = `UPDATE post SET ${setClause} WHERE id = $${paramIndex} RETURNING id, titulo, resumo, conteudo, professor_id, created_at, updated_at`;

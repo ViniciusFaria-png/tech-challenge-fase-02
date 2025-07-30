@@ -5,22 +5,15 @@ import { z } from "zod";
 const createPostBodySchema = z.object({
   titulo: z.string().min(1, "Title is required."),
   resumo: z.string().optional(),
-  conteudo: z.string().min(1, "Content is required.")
+  conteudo: z.string().min(1, "Content is required."),
+  professor_id: z.string().uuid("Invalid professor ID format.")
 });
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { titulo, resumo, conteudo } = createPostBodySchema.parse(
+    const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
       request.body
     );
-
-    const professor_id = parseInt((request.user as any)?.professor_id || "0");
-
-    if (!professor_id) {
-      return reply
-        .status(401)
-        .send({ message: "User not authenticated or invalid professor ID" });
-    }
 
     const createPostUseCase = makeCreatePostUseCase();
     const { post } = await createPostUseCase.execute({
@@ -38,6 +31,7 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
         issues: err.issues,
       });
     }
+    console.error("Create post error:", err);
     throw err;
   }
 }
@@ -51,8 +45,9 @@ export const createPostSchema = {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
       conteudo: { type: "string", minLength: 1 },
+      professor_id: { type: "string", format: "uuid" },
     },
-    required: ["titulo", "conteudo"],
+    required: ["titulo", "conteudo", "professor_id"],
   },
   response: {
     201: {
@@ -69,7 +64,7 @@ export const createPostSchema = {
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number", format: "int32" },
+            professor_id: { type: "string", format: "uuid" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },

@@ -1,2 +1,8 @@
 /node_modules
 /.env
+/build
+.buid
+build/
+/.vscode
+/coverage
+/dist

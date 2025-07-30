@@ -54,7 +54,7 @@ export const findByIdPostSchema = {
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number", format: "int32" },
+            professor_id: { type: "string" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
