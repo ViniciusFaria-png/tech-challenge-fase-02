@@ -1,5 +1,5 @@
 import { makeUpdatePostUseCase } from "@/use-cases/factory/make-update-post-use-case";
-import { UpdatePostUseCase } from "@/use-cases/factory/update-post";
+import { UpdatePostUseCase } from "@/use-cases/update-post";
 import { describe, expect, test } from "vitest";
 
 describe("makeUpdatePostUseCase", () => {

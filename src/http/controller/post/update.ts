@@ -13,7 +13,7 @@ const updatePostBodySchema = z
     titulo: z.string().min(1, "Title cannot be empty.").optional(),
     resumo: z.string().optional(),
     conteudo: z.string().min(1, "Content cannot be empty.").optional(),
-    professor_id: z.number().int().positive().optional(),
+    professor_id: z.string().optional(),
   })
   .partial();
 
@@ -58,7 +58,7 @@ export const updatePostSchema = {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
       conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "number", minimum: 1 },
+      professor_id: { type: "string" },
     },
     minProperties: 1,
   },
@@ -77,7 +77,7 @@ export const updatePostSchema = {
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "number", format: "int32" },
+            professor_id: { type: "string" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },

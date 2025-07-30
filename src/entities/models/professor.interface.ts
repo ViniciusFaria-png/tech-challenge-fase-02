@@ -1,6 +1,6 @@
 export interface IProfessor {
-  id?: number;
+  id: string;
   nome: string;
   materia: string;
-  user_id: number;
+  user_id: string;
 }

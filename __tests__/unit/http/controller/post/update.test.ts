@@ -1,7 +1,7 @@
 import { update } from "@/http/controller/post/update";
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
 import { makeUpdatePostUseCase } from "@/use-cases/factory/make-update-post-use-case";
-import { UpdatePostUseCase } from "@/use-cases/factory/update-post";
+import { UpdatePostUseCase } from "@/use-cases/update-post";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../../../setup/mocks/repository-mocks";
@@ -92,25 +92,24 @@ describe("Update Post Controller", () => {
     expect(updatePostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
-  it("should return 400 if validation fails (invalid body field type)", async () => {
+  it("should return 200 if professor_id is a valid string", async () => {
+    const updateData = { professor_id: '650e8400-e29b-41d4-a716-446655440001' };
+    const updatedPost = mockPost({ id: postId, ...updateData });
+
     request.params = { id: postId };
-    request.body = { professor_id: "not-a-number" };
+    request.body = updateData;
+    vi.mocked(updatePostUseCaseMock.execute).mockResolvedValue({
+      post: updatedPost,
+    });
 
     await update(request, reply);
 
-    expect(reply.status).toHaveBeenCalledWith(400);
-    expect(reply.send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "Validation error.",
-        issues: expect.arrayContaining([
-          expect.objectContaining({
-            path: ["professor_id"],
-            message: expect.any(String),
-          }),
-        ]),
-      })
-    );
-    expect(updatePostUseCaseMock.execute).not.toHaveBeenCalled();
+    expect(reply.status).toHaveBeenCalledWith(200);
+    expect(reply.send).toHaveBeenCalledWith({ post: updatedPost });
+    expect(updatePostUseCaseMock.execute).toHaveBeenCalledWith({
+      postId,
+      ...updateData,
+    });
   });
 
   it("should throw error if use case throws unexpected error", async () => {

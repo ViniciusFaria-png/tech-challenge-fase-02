@@ -7,18 +7,18 @@ describe("User Entity", () => {
     const user: IUser = mockUser();
 
     expect(user).toBeDefined();
-    expect(user.id).toBe(1);
+    expect(user.id).toEqual(expect.any(String));
     expect(user.email).toBe("test@fiap.com");
     expect(user.senha).toBe("hashed_password_123");
   });
 
   test("should create user with overrides", () => {
     const user: IUser = mockUser({
-      id: 999,
+      id: '999',
       email: "custom@test.com",
     });
 
-    expect(user.id).toBe(999);
+    expect(user.id).toBe('999');
     expect(user.email).toBe("custom@test.com");
     expect(user.senha).toBe("hashed_password_123");
   });

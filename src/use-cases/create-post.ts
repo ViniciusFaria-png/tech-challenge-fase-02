@@ -5,7 +5,7 @@ interface CreatePostUseCaseRequest {
   titulo: string;
   resumo?: string;
   conteudo: string;
-  professor_id: number;
+  professor_id: string;
 }
 
 interface CreatePostUseCaseResponse {
