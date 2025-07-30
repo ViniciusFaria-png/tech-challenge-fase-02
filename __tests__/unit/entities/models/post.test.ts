@@ -11,7 +11,7 @@ describe("Post Entity", () => {
     expect(post.titulo).toBe("Post de Teste");
     expect(post.resumo).toBe("Este é um resumo de teste para o post.");
     expect(post.conteudo).toBeDefined();
-    expect(post.professor_id).toBe(1);
+    expect(post.professor_id).toEqual(expect.any(String));
     expect(post.created_at).toBeInstanceOf(Date);
     expect(post.updated_at).toBeInstanceOf(Date);
   });

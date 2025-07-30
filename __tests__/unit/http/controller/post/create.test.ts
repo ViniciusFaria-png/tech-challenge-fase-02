@@ -31,11 +31,11 @@ describe("Create Post Controller", () => {
       resumo: "New Post Summary",
       conteudo: "New Post Content",
     };
-    const professor_id = 1;
+    const professor_id = '650e8400-e29b-41d4-a716-446655440001';
     const createdPost = mockPost({ ...postData, professor_id });
 
     request.body = postData;
-    request.user = { professor_id: professor_id.toString() };
+    request.user = { professor_id };
     vi.spyOn(createPostUseCaseMock, "execute").mockResolvedValue({
       post: createdPost,
     });
@@ -87,7 +87,7 @@ describe("Create Post Controller", () => {
       resumo: "New Post Summary",
       conteudo: "New Post Content",
     };
-    request.user = { professor_id: "1" };
+    request.user = { professor_id: '650e8400-e29b-41d4-a716-446655440001' };
 
     await create(request, reply);
 
@@ -111,7 +111,7 @@ describe("Create Post Controller", () => {
       titulo: "New Post Title",
       resumo: "New Post Summary",
     };
-    request.user = { professor_id: "1" };
+    request.user = { professor_id: '650e8400-e29b-41d4-a716-446655440001' };
 
     await create(request, reply);
 
@@ -136,7 +136,7 @@ describe("Create Post Controller", () => {
       titulo: "New Post Title",
       conteudo: "New Post Content",
     };
-    request.user = { professor_id: "1" };
+    request.user = { professor_id: '650e8400-e29b-41d4-a716-446655440001' };
     vi.spyOn(createPostUseCaseMock, "execute").mockRejectedValue(error);
 
     await expect(create(request, reply)).rejects.toThrow(error);

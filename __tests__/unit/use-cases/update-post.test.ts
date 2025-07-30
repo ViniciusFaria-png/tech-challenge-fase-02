@@ -1,5 +1,5 @@
 import { ResourceNotFoundError } from "@/use-cases/errors/resource-not-found-error";
-import { UpdatePostUseCase } from "@/use-cases/factory/update-post";
+import { UpdatePostUseCase } from "@/use-cases/update-post";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPost } from "../../setup/mocks/entity-mocks";
 import { mockPostRepository } from "../../setup/mocks/repository-mocks";

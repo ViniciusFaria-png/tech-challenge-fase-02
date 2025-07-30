@@ -41,7 +41,7 @@ describe("Integration - POST /posts (create)", () => {
         titulo: payload.titulo,
         resumo: payload.resumo,
         conteudo: payload.conteudo,
-        professor_id: expect.any(Number),
+        professor_id: expect.any(String),
         created_at: expect.any(String),
         updated_at: expect.any(String),
       })
