@@ -7,6 +7,7 @@ const CONFIG = {
   database: env.POSTGRES_DB,
   password: env.POSTGRES_PASSWORD,
   port: env.POSTGRES_PORT,
+  ssl: env.ENV === "production" ? { rejectUnauthorized: false } : false,
 };
 
 export class Database {
