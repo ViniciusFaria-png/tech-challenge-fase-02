@@ -87,7 +87,7 @@ var import_fastify = __toESM(require("fastify"));
 var import_config = require("dotenv/config");
 var import_zod = require("zod");
 var envSchema = import_zod.z.object({
-  NODE_ENV: import_zod.z.enum(["development", "production", "test"]).default("development"),
+  ENV: import_zod.z.enum(["development", "production", "test"]).default("development"),
   PORT: import_zod.z.coerce.number().default(3e3),
   POSTGRES_DB: import_zod.z.string(),
   POSTGRES_USER: import_zod.z.string(),
@@ -144,6 +144,27 @@ var Database = class {
   }
 };
 var db = new Database();
+
+// src/http/controller/post/middleware/fake-auth.ts
+var import_fastify_plugin = __toESM(require("fastify-plugin"));
+var fakeAuth = (0, import_fastify_plugin.default)(
+  function fakeAuth2(fastify2) {
+    return __async(this, null, function* () {
+      var _a;
+      const { rows } = yield db.query("SELECT id FROM professor LIMIT 1");
+      const professorId = ((_a = rows[0]) == null ? void 0 : _a.id) || 1;
+      fastify2.decorateRequest("user", void 0);
+      fastify2.addHook("preHandler", (req) => __async(null, null, function* () {
+        req.user = {
+          id: "fake-user-id",
+          professor_id: professorId.toString(),
+          email: "test@example.com"
+        };
+      }));
+    });
+  },
+  { name: "fakeAuth" }
+);
 
 // src/repositories/pg/post.repository.ts
 var PostRepository = class {
@@ -880,6 +901,9 @@ var globalErrorHandler = (error, _, reply) => {
 var app = (0, import_fastify.default)({
   logger: true
 });
+if (env.ENV !== "production") {
+  app.register(fakeAuth);
+}
 app.register(import_swagger.default, {
   openapi: {
     info: {

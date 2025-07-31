@@ -7,7 +7,7 @@ interface UpdatePostUseCaseRequest {
   titulo?: string;
   resumo?: string;
   conteudo?: string;
-  professor_id?: string;
+  professor_id?: number;
 }
 
 interface UpdatePostUseCaseResponse {

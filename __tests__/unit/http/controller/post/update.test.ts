@@ -92,24 +92,25 @@ describe("Update Post Controller", () => {
     expect(updatePostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
-  it("should return 200 if professor_id is a valid string", async () => {
-    const updateData = { professor_id: '650e8400-e29b-41d4-a716-446655440001' };
-    const updatedPost = mockPost({ id: postId, ...updateData });
-
+  it("should return 400 if validation fails (invalid body field type)", async () => {
     request.params = { id: postId };
-    request.body = updateData;
-    vi.mocked(updatePostUseCaseMock.execute).mockResolvedValue({
-      post: updatedPost,
-    });
+    request.body = { professor_id: "not-a-number" };
 
     await update(request, reply);
 
-    expect(reply.status).toHaveBeenCalledWith(200);
-    expect(reply.send).toHaveBeenCalledWith({ post: updatedPost });
-    expect(updatePostUseCaseMock.execute).toHaveBeenCalledWith({
-      postId,
-      ...updateData,
-    });
+    expect(reply.status).toHaveBeenCalledWith(400);
+    expect(reply.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Validation error.",
+        issues: expect.arrayContaining([
+          expect.objectContaining({
+            path: ["professor_id"],
+            message: expect.any(String),
+          }),
+        ]),
+      })
+    );
+    expect(updatePostUseCaseMock.execute).not.toHaveBeenCalled();
   });
 
   it("should throw error if use case throws unexpected error", async () => {

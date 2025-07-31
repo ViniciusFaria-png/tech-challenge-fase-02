@@ -6,14 +6,21 @@ const createPostBodySchema = z.object({
   titulo: z.string().min(1, "Title is required."),
   resumo: z.string().optional(),
   conteudo: z.string().min(1, "Content is required."),
-  professor_id: z.string().uuid("Invalid professor ID format.")
 });
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { titulo, resumo, conteudo, professor_id } = createPostBodySchema.parse(
+    const { titulo, resumo, conteudo } = createPostBodySchema.parse(
       request.body
     );
+
+    const professor_id = parseInt(request.user?.professor_id || "0");
+
+    if (!professor_id) {
+      return reply
+        .status(401)
+        .send({ message: "User not authenticated or invalid professor ID" });
+    }
 
     const createPostUseCase = makeCreatePostUseCase();
     const { post } = await createPostUseCase.execute({
@@ -31,7 +38,6 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
         issues: err.issues,
       });
     }
-    console.error("Create post error:", err);
     throw err;
   }
 }
@@ -39,15 +45,15 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
 export const createPostSchema = {
   summary: "Create a new post",
   tags: ["Posts"],
+  security: [{ bearerAuth: [] }],
   body: {
     type: "object",
     properties: {
       titulo: { type: "string", minLength: 1 },
       resumo: { type: "string" },
       conteudo: { type: "string", minLength: 1 },
-      professor_id: { type: "string", format: "uuid" },
     },
-    required: ["titulo", "conteudo", "professor_id"],
+    required: ["titulo", "conteudo"],
   },
   response: {
     201: {
@@ -64,7 +70,7 @@ export const createPostSchema = {
             titulo: { type: "string" },
             resumo: { type: "string", nullable: true },
             conteudo: { type: "string" },
-            professor_id: { type: "string", format: "uuid" },
+            professor_id: { type: "number", format: "int32" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
@@ -94,7 +100,17 @@ export const createPostSchema = {
       properties: {
         message: {
           type: "string",
-          example: "User not authenticated or invalid professor ID",
+          example: "Token inválido ou expirado",
+        },
+      },
+    },
+    403: {
+      type: "object",
+      properties: {
+        message: {
+          type: "string",
+          example:
+            "Acesso negado. Apenas professores podem realizar esta ação.",
         },
       },
     },

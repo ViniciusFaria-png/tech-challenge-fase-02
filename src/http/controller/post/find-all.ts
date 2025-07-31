@@ -8,7 +8,6 @@ export async function findAll(request: FastifyRequest, reply: FastifyReply) {
 
     return reply.status(200).send({ posts });
   } catch (err) {
-    console.error("Find all posts error:", err);
     throw err;
   }
 }
@@ -29,7 +28,7 @@ export const findAllPostsSchema = {
               titulo: { type: "string" },
               resumo: { type: "string", nullable: true },
               conteudo: { type: "string" },
-              professor_id: { type: "string" },
+              professor_id: { type: "number" },
               created_at: { type: "string", format: "date-time" },
               updated_at: { type: "string", format: "date-time" },
             },

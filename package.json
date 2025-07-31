@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "tsx watch src/server.ts",
     "start": "node build/server.js",
-    "build": "tsup src --out-dir build --format esm",
+    "build": "tsup src --out-dir build",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -20,13 +20,12 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/ViniciusFaria-png/tech-challenge-fase-02/issues"
   },
   "homepage": "https://github.com/ViniciusFaria-png/tech-challenge-fase-02#readme",
   "devDependencies": {
-    "@types/bcryptjs": "2.4.6",
     "@types/node": "24.0.13",
     "@types/pg": "8.15.4",
     "@vitest/coverage-v8": "3.2.4",

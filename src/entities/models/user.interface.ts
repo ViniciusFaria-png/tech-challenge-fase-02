@@ -1,7 +1,5 @@
 export interface IUser {
-  id: string;
+  id?: number;
   email: string;
   senha: string;
-  created_at: Date;
-  updated_at: Date;
 }

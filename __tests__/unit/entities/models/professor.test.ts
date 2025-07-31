@@ -7,10 +7,10 @@ describe('Professor Entity', () => {
     const professor: IProfessor = mockProfessor();
     
     expect(professor).toBeDefined();
-    expect(professor.id).toEqual(expect.any(String));
+    expect(professor.id).toBe(1);
     expect(professor.nome).toBe('Professor Teste');
     expect(professor.materia).toBe('Matemática');
-    expect(professor.user_id).toEqual(expect.any(String));
+    expect(professor.user_id).toBe(1);
   });
 
   test('should create professor with overrides', () => {
@@ -21,8 +21,8 @@ describe('Professor Entity', () => {
     
     expect(professor.nome).toBe('Custom Professor');
     expect(professor.materia).toBe('Física');
-    expect(professor.id).toEqual(expect.any(String));
-    expect(professor.user_id).toEqual(expect.any(String)); 
+    expect(professor.id).toBe(1);
+    expect(professor.user_id).toBe(1); 
   });
 
   test('should have all required properties', () => {

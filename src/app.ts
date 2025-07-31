@@ -1,21 +1,27 @@
+import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+
 import fastify from "fastify";
 import { env } from "./env";
-import { postRoutes } from "./http/controller/routes";
+import { postRoutes } from "./http/controller/post/routes";
+import { userRoutes } from "./http/controller/user/routes";
 import { globalErrorHandler } from "./utils/global-error-handler";
-import fastifyJwt from "@fastify/jwt";
 
 export const app = fastify({
   logger: true,
 });
 
-app.register(fastifyJwt,{
+// Registrar JWT
+app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
-  sign: {
-    expiresIn: "1h",
-  },
-})
+});
+
+// Usar fake auth apenas em desenvolvimento e quando não for produção
+if (env.ENV !== "production") {
+  // Comentar ou remover esta linha quando quiser testar com JWT real
+  // app.register(fakeAuth);
+}
 
 app.register(fastifySwagger, {
   openapi: {
@@ -30,7 +36,19 @@ app.register(fastifySwagger, {
         description: "Local server",
       },
     ],
-    tags: [{ name: "Posts", description: "Operations related to posts" }],
+    tags: [
+      { name: "Posts", description: "Operations related to posts" },
+      { name: "Auth", description: "Authentication operations" },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
 });
 
@@ -44,6 +62,7 @@ app.register(fastifySwaggerUi, {
   transformStaticCSP: (header) => header,
 });
 
+app.register(userRoutes);
 app.register(postRoutes);
 
 app.setErrorHandler(globalErrorHandler);
