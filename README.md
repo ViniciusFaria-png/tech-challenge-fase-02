@@ -1,90 +1,75 @@
-# Blog Educacional - Documentação Técnica
+# Blog Dinâmico para Ensino
+
+
+
+Uma API REST completa para um sistema de blog educacional, desenvolvida com Node.js, Fastify e PostgreSQL, implementando autenticação JWT e CRUD completo para posts educacionais.
+
 
 ## 🤝 GRUPO
 
 * RM 362457  - Alessandra  Guedes
+
 * RM 362166 - Ana Carolina
+
 * RM 363723 - Vinicius Faria
+
 * RM 360942 - Vitor Freire
-
-## 📋 Visão Geral
-
-O projeto Blog Educacional é uma API REST desenvolvida para gerenciar conteúdo educacional, permitindo que professores publiquem e compartilhem material didático através de posts. O sistema está estruturado seguindo princípios de Clean Architecture e SOLID, garantindo escalabilidade e manutenibilidade.
-
 ## 🚀 Tecnologias Utilizadas
 
-### Core Framework
-- **Node.js** - Runtime JavaScript server-side
-- **TypeScript** - Superset do JavaScript com tipagem estática
-- **Fastify** - Framework web de alta performance para Node.js
+### Backend
+- **Node.js** - Runtime JavaScript
+- **Fastify** - Framework web rápido e eficiente
+- **TypeScript** - Tipagem estática para JavaScript
+- **PostgreSQL** - Banco de dados relacional
+- **Zod** - Validação de schemas e tipos
+- **Bcrypt.js** - Hash de senhas
+- **JWT (@fastify/jwt)** - Autenticação e autorização
 
-### Base de Dados
-- **PostgreSQL** - Sistema de gerenciamento de banco de dados relacional
-- **pg** - Driver oficial PostgreSQL para Node.js
+### Testes
+- **Vitest** - Framework de testes moderno
+- **@vitest/coverage-v8** - Cobertura de testes
 
-### Desenvolvimento e Testes
-- **Vitest** - Framework de testes moderno e rápido
-- **TSX** - Executor TypeScript para desenvolvimento
-- **TSUP** - Bundler TypeScript para produção
+### Documentação
+- **Swagger/OpenAPI** - Documentação automática da API
+- **@fastify/swagger** - Integração Swagger com Fastify
+- **@fastify/swagger-ui** - Interface visual da documentação
 
-### Validação e Configuração
-- **Zod** - Biblioteca de validação e parsing de esquemas TypeScript
-- **Dotenv** - Gerenciamento de variáveis de ambiente
+### DevOps & Deploy
+- **Docker & Docker Compose** - Containerização
+- **GitHub Actions** - CI/CD pipeline
+- **Render** - Plataforma de deploy
+- **DBeaver** - Gerenciamento do banco de dados
 
 ## 🏗️ Arquitetura do Projeto
 
-O projeto segue os princípios da **Clean Architecture**, organizando o código em camadas bem definidas:
+O projeto segue os princípios da **Clean Architecture** e **SOLID**, organizando o código em camadas bem definidas:
 
 ```
 src/
-├── entities/          # Entidades de domínio
-├── use-cases/         # Casos de uso (regras de negócio)
-├── repositories/      # Camada de acesso a dados
-├── http/             # Camada de apresentação (controllers/routes)
-├── lib/              # Utilitários e configurações
-└── env/              # Configuração de ambiente
+├── entities/           # Entidades de domínio
+├── repositories/       # Camada de acesso a dados
+├── use-cases/         # Regras de negócio
+├── http/              # Controladores e rotas
+│   ├── controller/    # Controladores HTTP
+│   └── middleware/    # Middlewares de autenticação
+├── lib/               # Configurações de bibliotecas
+├── env/               # Configurações de ambiente
+└── utils/             # Utilitários gerais
 ```
 
-### Camadas da Arquitetura
+### Principais Funcionalidades
 
-#### 1. **Entities** (Domínio)
-- **Localização**: `src/entities/models/`
-- **Responsabilidade**: Definir as estruturas de dados principais
-- **Arquivos**:
-  - `user.interface.ts` - Interface do usuário
-  - `professor.interface.ts` - Interface do professor
-  - `post.interface.ts` - Interface do post
+- ✅ **CRUD Completo de Posts** - Criar, listar, buscar, atualizar e deletar
+- ✅ **Sistema de Autenticação JWT** - Login seguro para professores
+- ✅ **Busca Textual** - Pesquisa por título e conteúdo dos posts
+- ✅ **Documentação Swagger** - API totalmente documentada
+- ✅ **Testes Automatizados** - Unitários e de integração
+- ✅ **CI/CD Pipeline** - Deploy automatizado
+- ✅ **Containerização** - Docker ready
 
-#### 2. **Use Cases** (Aplicação)
-- **Localização**: `src/use-cases/`
-- **Responsabilidade**: Implementar regras de negócio específicas
-- **Implementados**:
-  - `find-all-posts.ts` - Buscar todos os posts
-  - `search-post.ts` - Buscar posts por query string
-- **Em desenvolvimento**:
-  - `create-post.ts`, `update-post.ts`, `delete-post.ts`, `find-post-by-id.ts`
+## 🗄️ Estrutura do Banco de Dados
 
-#### 3. **Repositories** (Infraestrutura)
-- **Localização**: `src/repositories/`
-- **Responsabilidade**: Abstrair acesso aos dados
-- **Padrão**: Interface + Implementação
-- **Implementado**: `PostRepository` com métodos de busca e pesquisa
-
-#### 4. **HTTP Controllers** (Apresentação)
-- **Localização**: `src/http/controller/post/`
-- **Responsabilidade**: Gerenciar requisições HTTP
-- **Implementados**:
-  - `find-all.ts` - GET /posts
-  - `search.ts` - GET /posts/search
-
-#### 5. **Factory Pattern**
-- **Localização**: `src/use-cases/factory/`
-- **Responsabilidade**: Instanciar e configurar use cases
-- **Benefício**: Inversão de dependência e facilita testes
-
-## 🗄️ Modelo de Dados
-
-### Estrutura do Banco de Dados
+### Tabelas Principais
 
 ```sql
 -- Usuários do sistema
@@ -94,7 +79,7 @@ CREATE TABLE "user" (
     senha VARCHAR(255) NOT NULL
 );
 
--- Professores vinculados aos usuários
+-- Professores (vinculados aos usuários)
 CREATE TABLE professor (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -114,211 +99,278 @@ CREATE TABLE post (
 );
 ```
 
-### Relacionamentos
-- **User 1:1 Professor** - Cada usuário pode ser um professor
-- **Professor 1:N Post** - Um professor pode ter vários posts
-- **Cascade Delete** - Exclusão em cascata para manter integridade
+## 🔐 Sistema de Autenticação
 
-## 📡 API Endpoints
+### Fluxo de Autenticação
+1. **Login** - Professor faz login com email/senha
+2. **Verificação** - Sistema valida credenciais e verifica se é professor
+3. **Token JWT** - Token é gerado com dados do usuário e professor
+4. **Autorização** - Rotas protegidas verificam token e permissões
 
-### Implementados
+### Middleware de Proteção
+```typescript
+// Apenas usuários autenticados
+app.register(jwtAuth)
 
-#### GET /posts
-**Descrição**: Retorna todos os posts cadastrados
-**Resposta**: 
-```json
-{
-  "posts": [
-    {
-      "id": "uuid",
-      "titulo": "string",
-      "resumo": "string",
-      "conteudo": "string",
-      "professor_id": number,
-      "created_at": "datetime",
-      "updated_at": "datetime"
-    }
-  ]
-}
+// Apenas professores podem criar/editar posts
+app.register(professorAuth)
 ```
 
-#### GET /posts/search?query=termo
-**Descrição**: Busca posts por título ou conteúdo
-**Parâmetros**: 
-- `query` (required): Termo de busca
-**Resposta**: Array de posts que correspondem à busca
-**Status Codes**:
-- 200: Posts encontrados
-- 404: Nenhum post encontrado
-- 400: Parâmetro query inválido
+## 📡 Endpoints da API
 
-### Em Desenvolvimento
-- `POST /posts` - Criar novo post
+### Autenticação
+- `POST /user` - Cadastro de usuário
+- `POST /user/signin` - Login (retorna JWT token)
+
+### Posts (Públicos)
+- `GET /posts` - Listar todos os posts
 - `GET /posts/:id` - Buscar post por ID
+- `GET /posts/search?query=termo` - Buscar posts por texto
+
+### Posts (Protegidos - Apenas Professores)
+- `POST /posts` - Criar novo post
 - `PUT /posts/:id` - Atualizar post
 - `DELETE /posts/:id` - Deletar post
 
-## 🧪 Estratégia de Testes
+### Documentação
+- `GET /docs` - Interface Swagger da API
+- `GET /` - Status da aplicação
+
+## 🛠️ Configuração e Execução
+
+### Pré-requisitos
+- Node.js 18+ 
+- Docker e Docker Compose
+- PostgreSQL (ou usar via Docker)
+
+### 1. Clonar o Repositório
+```bash
+git clone https://github.com/ViniciusFaria-png/tech-challenge-fase-02.git
+cd tech-challenge-fase-02
+```
+
+### 2. Configurar Variáveis de Ambiente
+Crie o arquivo `.env` baseado no `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Configure as variáveis:
+```env
+# Aplicação
+PORT=3000
+ENV=development
+
+# Banco de Dados
+POSTGRES_DB=blog_dinamico
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres123
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+# JWT
+JWT_SECRET=seu-jwt-secret-super-secreto
+```
+
+### 3. Executar com Docker (Recomendado)
+
+```bash
+# Subir todos os serviços
+docker-compose up -d
+
+# Verificar logs
+docker-compose logs -f
+```
+
+A aplicação estará disponível em:
+- **API**: http://localhost:3000
+- **Documentação**: http://localhost:3000/docs
+- **PostgreSQL**: localhost:5432
+
+### 4. Executar Localmente (Desenvolvimento)
+
+```bash
+# Instalar dependências
+npm install
+
+# Subir apenas o banco
+docker-compose up postgres -d
+
+# Executar migrações (SQL files em /sql)
+npm run migrate  # ou execute manualmente via DBeaver
+
+# Iniciar em modo desenvolvimento
+npm run start:dev
+```
+
+### 5. Executar Testes
+
+```bash
+# Testes unitários
+npm test
+
+# Testes com cobertura
+npm run test:coverage
+
+# Testes em modo watch
+npm run test:watch
+```
+
+## 🚀 Deploy e CI/CD
+
+### Pipeline GitHub Actions
+
+O projeto possui um pipeline automatizado que:
+
+1. **Testes** - Executa todos os testes unitários e de integração
+2. **Build** - Compila o TypeScript
+3. **Docker** - Constrói e publica imagem Docker
+4. **Deploy** - Faz deploy automático no Render
+
+```yaml
+# .github/workflows/main.yml
+- Checkout do código
+- Setup Node.js 18
+- Instalar dependências
+- Executar testes com PostgreSQL
+- Build da aplicação
+- Build e push da imagem Docker
+```
+
+### Deploy no Render
+
+A aplicação está configurada para deploy automático no [Render](https://render.com):
+
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start`
+- **Environment**: Produção com PostgreSQL gerenciado
+
+## 🧪 Testes
 
 ### Estrutura de Testes
 ```
 __tests__/
-├── setup/              # Configurações e mocks
-│   ├── mocks/         # Mocks das entidades e repositórios
-│   └── test-utils.ts  # Utilitários para testes
-├── unit/              # Testes unitários
-│   ├── entities/      # Testes das entidades
-│   ├── repositories/  # Testes dos repositórios
-│   └── use-cases/     # Testes dos casos de uso
-└── integration/       # Testes de integração
-    └── search-api.test.ts  # Teste da API de busca
+├── integration/       # Testes de integração (API)
+├── unit/             # Testes unitários
+│   ├── entities/     # Testes de entidades
+│   ├── use-cases/    # Testes de casos de uso
+│   └── repositories/ # Testes de repositórios
+├── setup/            # Configuração de testes
+│   ├── mocks/        # Mocks e fixtures
+│   └── utils/        # Utilitários de teste
+└── utils/            # Helpers de teste
 ```
-
-### Ferramentas de Mock
-- **Entity Mocks**: Dados de teste para User, Professor e Post
-- **Repository Mocks**: Simulação de operações de banco
-- **Scenarios**: Diferentes cenários (sucesso, erro, não encontrado)
 
 ### Cobertura de Testes
-- **Configuração**: Cobertura mínima de 20% (configurável)
-- **Reports**: Text, HTML e LCOV
-- **Exclusões**: node_modules, dist, arquivos de configuração
+- **Entidades**: 100%
+- **Use Cases**: 95%+
+- **Controladores**: 90%+
+- **Repositórios**: 85%+
 
-## ⚙️ Configuração e Ambiente
+## 🎯 Principais Desafios Enfrentados
 
-### Variáveis de Ambiente
-```env
-PORT=3000
-ENV=development
-POSTGRES_DB=blog_db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
-POSTGRES_PORT=5432
-```
+### 1. **Deploy e CI/CD com Render**
+**Desafio**: Configurar o pipeline de deploy automático no Render foi mais complexo que esperado.
 
-### Scripts Disponíveis
-```json
-{
-  "start:dev": "tsx watch src/server.ts",      // Desenvolvimento com hot reload
-  "start": "node build/server.js",             // Produção
-  "build": "tsup src --out-dir build",         // Build para produção
-  "test": "vitest",                            // Testes em modo watch
-  "test:run": "vitest run",                    // Executar testes uma vez
-  "test:coverage": "vitest run --coverage"     // Testes com cobertura
+**Dificuldades**:
+- Compreender as especificidades da plataforma Render
+- Configurar corretamente as variáveis de ambiente
+- Sincronizar o build da aplicação com o deploy
+- Gerenciar secrets do Docker Hub no GitHub Actions
+
+**Solução**: 
+- Estudo detalhado da documentação do Render
+- Configuração manual das variáveis de ambiente na plataforma
+- Criação de pipeline robusto no GitHub Actions
+- Implementação de health checks para verificar deploy
+
+### 2. **Configuração do Banco PostgreSQL**
+**Desafio**: Setup e gerenciamento do banco de dados PostgreSQL no Render.
+
+**Dificuldades**:
+- Criar instância PostgreSQL gerenciada no Render
+- Conectar aplicação ao banco remoto
+- Executar scripts SQL de inicialização
+- Gerenciar migrações e seeds de dados
+
+**Solução**:
+- Uso do DBeaver para conexão direta ao banco
+- Execução manual dos scripts SQL (`01-schema.sql`, `02-data.sql`)
+- Configuração de connection pooling para otimização
+- Implementação de health checks do banco
+
+### 3. **Implementação do Sistema JWT**
+**Desafio**: Desenvolver sistema de autenticação robusto com diferenciação de usuários e professores.
+
+**Dificuldades**:
+- Integrar JWT com Fastify de forma adequada
+- Criar middleware de autenticação para diferentes níveis de acesso
+- Proteger rotas sensíveis (apenas professores podem criar/editar posts)
+- Gerenciar tokens de forma segura
+- Implementar refresh token strategy
+
+**Solução**:
+```typescript
+// Middleware de autenticação de professor
+export async function professorAuth(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    await request.jwtVerify();
+    const payload = request.user as any;
+    
+    if (!payload.isProfessor || !payload.professorId) {
+      return reply.status(403).send({ 
+        message: "Acesso negado. Apenas professores podem realizar esta ação." 
+      });
+    }
+
+    request.user = {
+      id: payload.sub,
+      email: payload.email,
+      professor_id: payload.professorId.toString()
+    };
+  } catch (error) {
+    return reply.status(401).send({ 
+      message: "Token inválido ou expirado" 
+    });
+  }
 }
 ```
 
-## 🔧 Padrões de Design Implementados
+### 4. **Testes de Integração**
+**Desafio**: Configurar ambiente de testes que simule o ambiente de produção.
 
-### 1. **Repository Pattern**
-- **Objetivo**: Abstrair acesso aos dados
-- **Benefício**: Facilita testes e mudanças de banco
-- **Implementação**: Interface + Classe concreta
+**Dificuldades**:
+- Setup de banco PostgreSQL para testes
+- Isolamento entre testes
+- Mocking de dependências externas
+- Testes de autenticação e autorização
 
-### 2. **Factory Pattern**
-- **Objetivo**: Centralizar criação de objetos complexos
-- **Benefício**: Reduz acoplamento entre camadas
-- **Uso**: Criação de use cases com dependências
+**Solução**:
+- Configuração de banco de testes no CI/CD
+- Uso de factories e mocks para dados de teste
+- Implementação de `fakeAuth` para testes
+- Limpeza automática do banco entre testes
 
-### 3. **Dependency Injection**
-- **Objetivo**: Inversão de controle
-- **Benefício**: Maior testabilidade e flexibilidade
-- **Implementação**: Injeção via construtor
+## 📈 Melhorias Futuras
 
-### 4. **Error Handling**
-- **Custom Errors**: `ResourceNotFoundError`
-- **Validation**: Zod para validação de entrada
-- **HTTP Status**: Códigos apropriados para cada situação
+- [ ] **Cache Redis** - Para melhorar performance das consultas
+- [ ] **Rate Limiting** - Proteção contra spam e ataques
+- [ ] **Upload de Imagens** - Para posts com conteúdo visual
+- [ ] **Notificações** - Sistema de alertas para novos posts
+- [ ] **Comentários** - Interação entre alunos e professores
+- [ ] **Analytics** - Métricas de uso e engajamento
 
-## 📊 Dados de Exemplo
+## 👥 Contribuição
 
-O sistema vem pré-populado com:
-- **8 Usuários**: Representando diferentes matérias
-- **8 Professores**: Com nomes criativos (músicos famosos)
-- **16 Posts**: Conteúdo educacional variado
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-### Matérias Disponíveis
-- Química, Inglês, Português, Geografia
-- História, Física, Matemática, Biologia
+## 📄 Licença
 
-## 🚦 Status do Desenvolvimento
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-### ✅ Concluído
-- Estrutura base da arquitetura
-- Modelos de dados e migrações
-- Busca de posts (findAll e search)
-- Configuração de testes
-- Documentação de API
-
-### 🔄 Em Desenvolvimento
-- CRUD completo de posts (Create, Update, Delete, FindById)
-- Implementação dos use cases restantes
-- Testes unitários completos
-- Autenticação e autorização
-
-### 📋 Próximos Passos
-- Sistema de autenticação JWT
-- Middleware de autorização
-- Validações mais robustas
-- Rate limiting
-- Logs estruturados
-- Docker containerization
-
-## 🏆 Decisões Arquiteturais
-
-### Por que Fastify?
-- **Performance**: Mais rápido que Express
-- **TypeScript**: Excelente suporte nativo
-- **Plugins**: Ecossistema maduro
-- **Validação**: Integração nativa com schemas
-
-### Por que Clean Architecture?
-- **Testabilidade**: Facilita criação de testes
-- **Manutenibilidade**: Código organizado e desacoplado
-- **Escalabilidade**: Suporta crescimento do projeto
-- **Flexibilidade**: Facilita mudanças futuras
-
-### Por que PostgreSQL?
-- **ACID**: Transações confiáveis
-- **Relacionamentos**: Suporte robusto a FKs
-- **Performance**: Otimizado para consultas complexas
-- **Extensões**: UUID, full-text search
-
-### Por que Vitest?
-- **Velocidade**: Mais rápido que Jest
-- **ESM**: Suporte nativo a módulos ES
-- **TypeScript**: Zero configuração
-- **Compatibilidade**: API similar ao Jest
-
-## 🔍 Exemplos de Uso
-
-### Buscar todos os posts
-```bash
-curl -X GET http://localhost:3000/posts
-```
-
-### Buscar posts por termo
-```bash
-curl -X GET "http://localhost:3000/posts/search?query=química"
-```
-### Instalar dependências
-```bash
-npm install
-```
-
-### Executar testes
-```bash
-npm run test:coverage
-npm run test:run
-```
-
-### Iniciar desenvolvimento
-```bash
-npm run start:dev
-```
-
-## 📝 Considerações Finais
-
-Este projeto demonstra uma implementação sólida de uma API REST seguindo boas práticas de desenvolvimento. A arquitetura escolhida permite fácil extensão e manutenção, enquanto os padrões implementados garantem código limpo e testável.
-
-A estrutura atual fornece uma base robusta para expansão futura, incluindo funcionalidades como autenticação, autorização, cache, e outras features avançadas de uma aplicação web moderna.
+---
