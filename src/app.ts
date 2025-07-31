@@ -67,6 +67,10 @@ app.register(postRoutes);
 
 app.setErrorHandler(globalErrorHandler);
 
+app.get("/", async (request, reply) => {
+  return { status: "ok", message: "Servidor rodando!" };
+});
+
 app.ready((err) => {
   if (err) throw err;
   app.swagger();
