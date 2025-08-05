@@ -4,7 +4,7 @@
 
 Uma API REST completa para um sistema de blog educacional, desenvolvida com Node.js, Fastify e PostgreSQL, implementando autenticação JWT e CRUD completo para posts educacionais.
 
-
+Render Deploy: https://blog-dinamico-app.onrender.com/
 ## 🤝 GRUPO
 
 * RM 362457  - Alessandra  Guedes
@@ -14,6 +14,7 @@ Uma API REST completa para um sistema de blog educacional, desenvolvida com Node
 * RM 363723 - Vinicius Faria
 
 * RM 360942 - Vitor Freire
+  
 ## 🚀 Tecnologias Utilizadas
 
 ### Backend
