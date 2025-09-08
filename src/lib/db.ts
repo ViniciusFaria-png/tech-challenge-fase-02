@@ -1,10 +1,8 @@
 import { env } from "@/env";
 import { Pool, PoolClient } from "pg";
 
-const PRODUCTION_DATABASE_URL = "postgresql://postgres:SzObezvtEgGl3H62ro5MxSheknB6VM7M@db.ybriuyokzgawqcveniem.supabase.co:6543/postgres?sslmode=require";
-
 const CONFIG = env.ENV === "production" ? {
-  connectionString: PRODUCTION_DATABASE_URL,
+  connectionString: env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
   family: 4,
   max: 20,
