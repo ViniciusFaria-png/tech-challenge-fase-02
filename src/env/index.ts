@@ -11,6 +11,7 @@ const envSchema = z.object({
   POSTGRES_HOST: z.string().default("db"),
   POSTGRES_PORT: z.coerce.number(),
   JWT_SECRET: z.string(),
+  DATABASE_URL: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);
