@@ -6,6 +6,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
 import { env } from "./env";
 import { postRoutes } from "./http/controller/post/routes";
+import { teacherRoutes } from "./http/controller/professor/routes";
 import { userRoutes } from "./http/controller/user/routes";
 import { globalErrorHandler } from "./utils/global-error-handler";
 
@@ -49,6 +50,8 @@ app.register(fastifySwagger, {
     tags: [
       { name: "Posts", description: "Operations related to posts" },
       { name: "Auth", description: "Authentication operations" },
+      { name: "Users", description: "Operations related to users" },
+      { name: "Professors", description: "Operations related to professors" },
     ],
     components: {
       securitySchemes: {
@@ -74,6 +77,7 @@ app.register(fastifySwaggerUi, {
 
 app.register(userRoutes);
 app.register(postRoutes);
+app.register(teacherRoutes);
 
 app.setErrorHandler(globalErrorHandler);
 
