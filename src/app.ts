@@ -19,6 +19,7 @@ app.register(fastifyCors, {
     "http://localhost:3000",  // Create React App
     "http://localhost:3001",  // Outras possíveis portas
     "http://127.0.0.1:5173",  // Localhost alternativo
+    "https://teacher-post-challenge.vercel.app/"
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
