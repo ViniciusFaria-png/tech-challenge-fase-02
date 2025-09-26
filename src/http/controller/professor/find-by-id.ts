@@ -5,7 +5,7 @@ import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-fo
 
 export async function findById(request: FastifyRequest, reply: FastifyReply) {
   const findProfessorByIdParamsSchema = z.object({
-    id: z.string().uuid(),
+    id: z.string(),
   });
 
   const { id } = findProfessorByIdParamsSchema.parse(request.params);
