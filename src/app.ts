@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
@@ -10,6 +11,11 @@ import { globalErrorHandler } from "./utils/global-error-handler";
 
 export const app = fastify({
   logger: true,
+});
+
+
+app.register(cors, {
+  origin: "*",
 });
 
 // Registrar JWT
@@ -34,6 +40,10 @@ app.register(fastifySwagger, {
       {
         url: `http://localhost:${env.PORT}`,
         description: "Local server",
+      },
+      {
+        url: `https://blog-dinamico-app.onrender.com`,
+        description: "Production server",
       },
     ],
     tags: [
