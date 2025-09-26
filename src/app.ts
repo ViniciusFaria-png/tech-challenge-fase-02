@@ -2,7 +2,6 @@ import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
-import fastifyCors from "@fastify/cors";
 import fastify from "fastify";
 import { env } from "./env";
 import { postRoutes } from "./http/controller/post/routes";
@@ -11,18 +10,6 @@ import { globalErrorHandler } from "./utils/global-error-handler";
 
 export const app = fastify({
   logger: true,
-});
-
-app.register(fastifyCors, {
-  origin: [
-    "http://localhost:5173",  // Vite dev server
-    "http://localhost:3000",  // Create React App
-    "http://localhost:3001",  // Outras possíveis portas
-    "http://127.0.0.1:5173",  // Localhost alternativo
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 // Registrar JWT
