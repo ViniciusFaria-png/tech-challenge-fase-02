@@ -5,4 +5,5 @@ export interface IProfessorRepository {
   getName(id: number): Promise<string>;
   getProfessorId(userId: number): Promise<number>;
   findByUserId(userId: number): Promise<Professor | null>;
+  findById(id: number): Promise<Professor | null>;
 }
