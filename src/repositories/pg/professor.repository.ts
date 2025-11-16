@@ -59,4 +59,57 @@ export class ProfessorRepository implements IProfessorRepository {
 
     return result?.rows[0] || null;
   }
+
+  async findAll(): Promise<Professor[]> {
+    const result = await db.clientInstance?.query(
+      `
+      SELECT * FROM professor ORDER BY id ASC
+      `
+    );
+
+    return result?.rows || [];
+  }
+
+  async update(id: number, data: Partial<Omit<Professor, "id">>): Promise<Professor | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let paramCount = 1;
+
+    if (data.nome !== undefined) {
+      fields.push(`nome = $${paramCount++}`);
+      values.push(data.nome);
+    }
+    if (data.materia !== undefined) {
+      fields.push(`materia = $${paramCount++}`);
+      values.push(data.materia);
+    }
+    if (data.user_id !== undefined) {
+      fields.push(`user_id = $${paramCount++}`);
+      values.push(data.user_id);
+    }
+
+    if (fields.length === 0) {
+      return this.findById(id);
+    }
+
+    values.push(id);
+    const query = `
+      UPDATE professor 
+      SET ${fields.join(", ")} 
+      WHERE id = $${paramCount} 
+      RETURNING *
+    `;
+
+    const result = await db.clientInstance?.query(query, values);
+    return result?.rows[0] || null;
+  }
+
+  async delete(id: number): Promise<void> {
+    await db.clientInstance?.query(
+      `
+      DELETE FROM professor WHERE id = $1
+      `,
+      [id]
+    );
+  }
 }
