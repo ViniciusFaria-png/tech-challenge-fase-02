@@ -1,5 +1,6 @@
 import { User } from "@/entities/user.entity";
 import { IUserRepository } from "@/repositories/user.repository.interface";
+import { hash } from "bcryptjs";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 
 interface UpdateUserUseCaseRequest {
@@ -19,6 +20,10 @@ export class UpdateUserUseCase {
     userId,
     ...data
   }: UpdateUserUseCaseRequest): Promise<UpdateUserUseCaseResponse> {
+    if (data.senha) {
+      data.senha = await hash(data.senha, 8);
+    }
+
     const user = await this.userRepository.update(userId, data);
 
     if (!user) {
